@@ -3,7 +3,7 @@
         "Bezeichnung Auftragskonto": "Free",
         "IBAN Auftragskonto": "DE61120965970001891332",
         "BIC Auftragskonto": "GENODEF1S10",
-        "Bankname Auftragskonto": "Sparda-Bank Berlin eG",
+        "Bankname Auftragskonto":19 "Sparda-Bank Berlin eG",
         "Buchungstag": "19.03.2026",
         "Valutadatum": "19.03.2026",
         "Name Zahlungsbeteiligter": "Adyen N.V.",
