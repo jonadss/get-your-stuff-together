@@ -1,0 +1,19 @@
+# Virtuelle Umgebungen von Python
+.venv/
+__pycache__/
+*.py[cod]
+
+# Betriebssystem-spezifische Dateien
+.DS_Store
+Thumbs.db
+
+
+import_csv-sql_lite/csv/*
+!import_csv-sql_lite/csv/.gitkeep
+
+db/*
+!db/.gitkeep
+
+*.sqlite3
+
+
