@@ -1,20 +1,3 @@
-"""
-Finance DB – Abfrage-Skript
-============================
-Projektstruktur:
-  get-your-stuff-together/
-  ├── import_csv-sql_lite/
-  │   └── query_db.py        <- dieses Skript
-  └── db/
-      └── transaktion.db
-
-Sortier-Logik overview():
-  Neueste Buchung steht oben.
-  Innerhalb desselben Tages: niedrigster Saldo zuerst.
-  Begründung: Saldo sinkt mit jeder Ausgabe → niedrigster Saldo
-  = späteste Transaktion des Tages → steht bei "neueste oben" ganz vorn.
-"""
-
 import sqlite3
 from pathlib import Path
 from tabulate import tabulate
@@ -101,6 +84,15 @@ def bank_balance(database: sqlite3.Connection) -> float:
         return 0.0
 
 
+def test(database: sqlite3.Connection):
+    cursor = database.cursor()
+    cursor.execute("""
+        SELECT saldo_nach_buchung
+        FROM transaktionen""")
+    row = cursor.fetchone()
+    print(row)
+
+
 # ──────────────────────────────────────────────
 # EINSTIEGSPUNKT
 # ──────────────────────────────────────────────
@@ -114,3 +106,6 @@ if __name__ == "__main__":
     with sqlite3.connect(DB_PFAD) as conn:
         overview(conn)
         bank_balance(conn)
+
+
+

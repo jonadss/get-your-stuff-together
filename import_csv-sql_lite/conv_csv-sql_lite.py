@@ -21,6 +21,7 @@ import os
 import sys
 from pathlib import Path
 from datetime import datetime
+from tabulate import tabulate
 
 
 # ──────────────────────────────────────────────
@@ -30,7 +31,7 @@ from datetime import datetime
 SKRIPT_DIR = Path(__file__).parent                          # .../import_csv-sql_lite/
 PROJEKT_DIR = SKRIPT_DIR.parent                             # .../get-your-stuff-together/
 
-CSV_PFAD = SKRIPT_DIR / "csv" / "kontoauszug copy.csv"
+CSV_PFAD = SKRIPT_DIR / "csv" / "kontoauszug.csv"
 DB_PFAD  = PROJEKT_DIR / "db" / "transaktion.db"
 
 
@@ -181,6 +182,13 @@ def daten_bereinigen(df: pd.DataFrame) -> pd.DataFrame:
     )
     df = df.sort_values("_datum_parsed", ascending=True).reset_index(drop=True)
 
+    # Heutige Buchungen ignorieren – könnten noch unvollständig sein
+    heute = pd.Timestamp.today().normalize()
+    heute_buchungen = (df["_datum_parsed"] == heute).sum()
+    if heute_buchungen > 0:
+        print(f"  Übersprungen: {heute_buchungen} Buchung(en) vom heutigen Tag ({heute.strftime('%d.%m.%Y')}) ignoriert.")
+        df = df[df["_datum_parsed"] < heute].reset_index(drop=True)
+
     return df
 
 
@@ -241,7 +249,6 @@ def zeilen_importieren(df: pd.DataFrame, conn: sqlite3.Connection) -> tuple:
 def bericht_ausgeben(gesamt: int, neu: int, start: datetime) -> None:
     """Konsolenausgabe nach dem Import."""
     duplikate  = gesamt - neu
-    dauer_ms   = (datetime.now() - start).total_seconds() * 1000
     db_groesse = os.path.getsize(DB_PFAD) / 1024
 
     print(f"\n{'=' * 54}")
@@ -254,8 +261,55 @@ def bericht_ausgeben(gesamt: int, neu: int, start: datetime) -> None:
     print(f"  Neu importiert      : {neu:>6}")
     print(f"  Duplikate ignoriert : {duplikate:>6}")
     print(f"  {'-' * 50}")
-    print(f"  Dauer               : {dauer_ms:.1f} ms")
     print(f"{'=' * 54}\n")
+
+
+# ──────────────────────────────────────────────
+# AUSWERTUNGS-FUNKTIONEN
+# ──────────────────────────────────────────────
+
+def overview(database: sqlite3.Connection) -> None:
+    """Gibt alle Transaktionen chronologisch sortiert als Tabelle aus."""
+    cursor = database.cursor()
+    cursor.execute("""
+        SELECT buchungs_id, buchungstag, betrag, saldo_nach_buchung, verwendungszweck
+        FROM transaktionen
+        ORDER BY
+            SUBSTR(buchungstag, 7, 4) ASC,  -- Jahr  (YYYY)
+            SUBSTR(buchungstag, 4, 2) ASC,  -- Monat (MM)
+            SUBSTR(buchungstag, 1, 2) ASC,  -- Tag   (DD)
+            saldo_nach_buchung DESC          -- Höchster Saldo zuerst = früher am Tag
+    """)
+    content = cursor.fetchall()
+    headers = ["ID", "Datum", "Betrag", "Saldo", "Zweck"]
+    print(f"\n{'─' * 54}")
+    print(f"  Transaktions-Übersicht  ({len(content)} Einträge)")
+    print(f"{'─' * 54}")
+    print(tabulate(content, headers=headers, tablefmt="outline",
+                   floatfmt=".2f"))
+
+
+def bank_balance(database: sqlite3.Connection) -> float:
+    """
+    Gibt den aktuellen Kontostand zurück (Saldo der letzten Buchung nach ID).
+    Gibt ihn auch direkt in der Konsole aus.
+    """
+    cursor = database.cursor()
+    cursor.execute("""
+        SELECT saldo_nach_buchung
+        FROM transaktionen
+        ORDER BY buchungs_id DESC
+        LIMIT 1
+    """)
+    row = cursor.fetchone()
+    if row is None:
+        print("\n  Keine Buchungen in der Datenbank gefunden.")
+        return 0.0
+    saldo = row[0]
+    print(f"\n{'─' * 54}")
+    print(f"  Aktueller Kontostand : {saldo:>12.2f} EUR")
+    print(f"{'─' * 54}")
+    return saldo
 
 
 # ──────────────────────────────────────────────
@@ -292,12 +346,10 @@ def main() -> None:
         with sqlite3.connect(DB_PFAD) as conn:
             tabelle_erstellen(conn.cursor())
             gesamt, neu = zeilen_importieren(df, conn)
+            bericht_ausgeben(gesamt, neu, start)
     except sqlite3.OperationalError as e:
         print(f"\nFEHLER (Datenbank): {e}")
         sys.exit(1)
-
-    bericht_ausgeben(gesamt, neu, start)
-
 
 if __name__ == "__main__":
     main()
