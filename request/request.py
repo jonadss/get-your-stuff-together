@@ -7,13 +7,13 @@ from tabulate import tabulate
 # PFAD  (relativ zu diesem Skript)
 # ──────────────────────────────────────────────
 
-SKRIPT_DIR = Path(__file__).parent          # .../import_csv-sql_lite/
-PROJEKT_DIR = SKRIPT_DIR.parent             # .../get-your-stuff-together/
+SKRIPT_DIR = Path(__file__).parent          
+PROJEKT_DIR = SKRIPT_DIR.parent             
 DB_PFAD = PROJEKT_DIR / "db" / "transaktion.db"
 
 
 # ──────────────────────────────────────────────
-# ABFRAGE-FUNKTIONEN
+# Auswertung-FUNKTIONEN
 # ──────────────────────────────────────────────
 
 def overview(database: sqlite3.Connection) -> None:
@@ -32,13 +32,12 @@ def overview(database: sqlite3.Connection) -> None:
             SUBSTR(buchungstag, 7, 4) DESC,  
             SUBSTR(buchungstag, 4, 2) DESC,  
             SUBSTR(buchungstag, 1, 2) DESC,  
-            buchungs_id                       
-                                             
-                                             
+            buchungs_id                      
     """)
     content = cursor.fetchall()
-    headers = ["ID", "Datum", "Betrag (€)", "Saldo (€)", "Verwendungszweck"]
 
+    #Tabelle 
+    headers = ["ID", "Datum", "Betrag (€)", "Saldo (€)", "Verwendungszweck"]
     print(f"\n{'─' * 70}")
     print(f"  Transaktions-Übersicht  –  {len(content)} Einträge  (neueste oben)")
     print(f"{'─' * 70}")
@@ -51,13 +50,9 @@ def overview(database: sqlite3.Connection) -> None:
 
 
 def bank_balance(database: sqlite3.Connection) -> float:
-    """
-    Liest den Kontostand der letzten Buchung (höchste buchungs_id).
-    Gibt den Saldo als float zurück und gibt ihn auf der Konsole aus.
-    """
     cursor = database.cursor()
     cursor.execute("""
-        SELECT saldo_nach_buchung
+        SELECT sald o_nach_buchung
         FROM transaktionen
         ORDER BY
             SUBSTR(buchungstag, 7, 4) DESC,  
@@ -80,19 +75,16 @@ def bank_balance(database: sqlite3.Connection) -> float:
         return 0.0
 
 
+#Test funktionen 
 def test(database: sqlite3.Connection):
     cursor = database.cursor()
+    x = 1
+  
     cursor.execute("""
-        SELECT verwendungszweck
+        SELECT buchungs_id, verwendungszweck
         FROM transaktionen
-        ORDER BY
-            SUBSTR(buchungstag, 7, 4) DESC,  
-            SUBSTR(buchungstag, 4, 2) DESC,  
-            SUBSTR(buchungstag, 1, 2) DESC,  
-            buchungs_id
         """)
-       
-    row = cursor.fetchone()
+    row = cursor.fetchall()
     print(row[0])
 
 
@@ -108,7 +100,7 @@ if __name__ == "__main__":
 
     with sqlite3.connect(DB_PFAD) as conn:
         overview(conn)
-        bank_balance(conn)
+    
 
 
 
