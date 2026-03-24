@@ -21,24 +21,20 @@ def overview(database: sqlite3.Connection) -> None:
     Zeigt alle Transaktionen chronologisch – neueste Buchung oben.
 
     Sortierung:
-      1. Datum DESC          → neuestes Datum zuerst
-      2. buchungs_id DESC    → innerhalb desselben Tages: höchste ID zuerst.
-                               Die ID wird beim Import chronologisch vergeben
-                               (älteste Buchung = niedrigste ID), daher ist
-                               die höchste ID immer die späteste Buchung —
-                               unabhängig davon ob der Saldo steigt oder sinkt.
+      1. Datum DESC             → neuestes Datum zuerst
+      2. buchungs_id            → innerhalb desselben Tages
     """
     cursor = database.cursor()
     cursor.execute("""
         SELECT buchungs_id, buchungstag, betrag, saldo_nach_buchung, verwendungszweck
         FROM transaktionen
         ORDER BY
-            SUBSTR(buchungstag, 7, 4) DESC,  -- Jahr  (YYYY)
-            SUBSTR(buchungstag, 4, 2) DESC,  -- Monat (MM)
-            SUBSTR(buchungstag, 1, 2) DESC,  -- Tag   (DD)
-            buchungs_id                      -- innerhalb desselben Tages: höchste ID zuerst
-                                             -- (ID wird chronologisch beim Import vergeben
-                                             --  → höchste ID = späteste Buchung des Tages)
+            SUBSTR(buchungstag, 7, 4) DESC,  
+            SUBSTR(buchungstag, 4, 2) DESC,  
+            SUBSTR(buchungstag, 1, 2) DESC,  
+            buchungs_id                       
+                                             
+                                             
     """)
     content = cursor.fetchall()
     headers = ["ID", "Datum", "Betrag (€)", "Saldo (€)", "Verwendungszweck"]
@@ -87,10 +83,17 @@ def bank_balance(database: sqlite3.Connection) -> float:
 def test(database: sqlite3.Connection):
     cursor = database.cursor()
     cursor.execute("""
-        SELECT saldo_nach_buchung
-        FROM transaktionen""")
+        SELECT verwendungszweck
+        FROM transaktionen
+        ORDER BY
+            SUBSTR(buchungstag, 7, 4) DESC,  
+            SUBSTR(buchungstag, 4, 2) DESC,  
+            SUBSTR(buchungstag, 1, 2) DESC,  
+            buchungs_id
+        """)
+       
     row = cursor.fetchone()
-    print(row)
+    print(row[0])
 
 
 # ──────────────────────────────────────────────
