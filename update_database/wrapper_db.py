@@ -1,29 +1,38 @@
 import sqlite3
+from pathlib import Path
 
 
+#Import
+SKRIPT_DIR = Path(__file__).parent         
+PROJEKT_DIR = SKRIPT_DIR.parent    
 DB_PFAD = PROJEKT_DIR / "db" / "transaktion.db"
 
 
-def test():  
-    
+# ──────────────────────────────────────────────
+# update verwendungszweck
+# ──────────────────────────────────────────────
+def update_verwendung_to_kategorie(database):  
+    search_data_test = ["EDEKA","Penny"]    
     cursor = database.cursor()
     cursor.execute("""
-        SELECT saldo_nach_buchung
+        SELECT buchungs_id, verwendungszweck
         FROM transaktionen
-        ORDER BY
-            SUBSTR(buchungstag, 7, 4) DESC,  
-            SUBSTR(buchungstag, 4, 2) DESC,  
-            SUBSTR(buchungstag, 1, 2) DESC,  
-            buchungs_id DESC -- Hier war das Komma zu viel
-        LIMIT 1                           
+        ORDER BY buchungs_id                          
     """)
-    row = cursor.fetchone()
-    print(f"\n{'─' * 70}")
+    row = cursor.fetchall()
+
     if row:
-        saldo = row[0]
-        print(f"  Aktueller Kontostand : {saldo:>12.2f} €")
-        print(f"{'─' * 70}\n")
-        return saldo
+        for x in range(len(row)):
+            id, zweck = row[x]
+            if any(wort in zweck for wort in search_data_test):
+                cursor.execute("""  
+                UPDATE transaktionen
+                SET verwendungszweck = "LEBENlol"
+                WHERE buchungs_id = ?
+                """, (id,))
+            
+
+
     else:
         print("  Noch keine Daten in der Datenbank.")
         print(f"{'─' * 70}\n")
@@ -32,7 +41,7 @@ def test():
 
 
 
-
+#main
 if __name__ == "__main__":
     if not DB_PFAD.exists():
         print(f"\nFEHLER: Datenbank nicht gefunden: '{DB_PFAD}'")
@@ -42,7 +51,3 @@ if __name__ == "__main__":
     with sqlite3.connect(DB_PFAD) as conn:
   
         test(conn)
-
-
-
-food = [edeka]

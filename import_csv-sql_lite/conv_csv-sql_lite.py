@@ -1,18 +1,3 @@
-"""
-Finance-to-SQLite Importer
-==========================
-Liest Bank-CSVs im deutschen Format und importiert sie
-chronologisch und duplikatgeschützt in eine SQLite-Datenbank.
-
-Projektstruktur:
-  get-your-stuff-together/
-  ├── import_csv-sql_lite/
-  │   ├── conv_csv-sql_lite.py   <- dieses Skript
-  │   └── csv/
-  │       └── kontoauszug.csv
-  └── db/
-      └── transaktion.db
-"""
 
 import sqlite3
 import pandas as pd
@@ -28,8 +13,8 @@ from tabulate import tabulate
 # PFADE  (relativ zum Skript-Verzeichnis)
 # ──────────────────────────────────────────────
 
-SKRIPT_DIR = Path(__file__).parent                          # .../import_csv-sql_lite/
-PROJEKT_DIR = SKRIPT_DIR.parent                             # .../get-your-stuff-together/
+SKRIPT_DIR = Path(__file__).parent                          
+PROJEKT_DIR = SKRIPT_DIR.parent                             
 
 CSV_PFAD = SKRIPT_DIR / "csv" / "kontoauszug.csv"
 DB_PFAD  = PROJEKT_DIR / "db" / "transaktion.db"
@@ -72,11 +57,6 @@ PFLICHT_SPALTEN = [
 # ──────────────────────────────────────────────
 
 def deutschen_betrag_konvertieren(wert) -> float:
-    """
-    Wandelt deutsche Zahlenstrings in echte Floats um.
-      '1.250,50'  ->  1250.50
-      '-300,00'   ->  -300.00
-    """
     if pd.isna(wert) or str(wert).strip() == "":
         return 0.0
     bereinigt = re.sub(r"\.", "", str(wert).strip())
@@ -86,15 +66,14 @@ def deutschen_betrag_konvertieren(wert) -> float:
     except ValueError:
         return 0.0
 
-
+#Liest eine optionale Spalte aus
 def opt(zeile, spalte: str) -> str:
-    """Liest eine optionale Spalte aus; gibt '' zurück wenn nicht vorhanden."""
     if spalte not in zeile.index:
         return ""
     val = zeile[spalte]
     return "" if pd.isna(val) or str(val).strip() in ("nan", "") else str(val).strip()
 
-
+#maybe auslagern
 def tabelle_erstellen(cursor: sqlite3.Cursor) -> None:
     """
     Erstellt die Tabelle 'transaktionen' falls sie noch nicht existiert.
@@ -138,7 +117,7 @@ def tabelle_erstellen(cursor: sqlite3.Cursor) -> None:
 
 
 def csv_laden(pfad: Path) -> pd.DataFrame:
-    """Liest die CSV im deutschen Bankformat (Semikolon-getrennt)."""
+
     if not pfad.is_file():
         raise FileNotFoundError(f"CSV nicht gefunden: '{pfad}'")
 
@@ -268,49 +247,14 @@ def bericht_ausgeben(gesamt: int, neu: int, start: datetime) -> None:
 # AUSWERTUNGS-FUNKTIONEN
 # ──────────────────────────────────────────────
 
-def overview(database: sqlite3.Connection) -> None:
-    """Gibt alle Transaktionen chronologisch sortiert als Tabelle aus."""
-    cursor = database.cursor()
-    cursor.execute("""
-        SELECT buchungs_id, buchungstag, betrag, saldo_nach_buchung, verwendungszweck
-        FROM transaktionen
-        ORDER BY
-            SUBSTR(buchungstag, 7, 4) ASC,  -- Jahr  (YYYY)
-            SUBSTR(buchungstag, 4, 2) ASC,  -- Monat (MM)
-            SUBSTR(buchungstag, 1, 2) ASC,  -- Tag   (DD)
-            saldo_nach_buchung DESC          -- Höchster Saldo zuerst = früher am Tag
-    """)
-    content = cursor.fetchall()
-    headers = ["ID", "Datum", "Betrag", "Saldo", "Zweck"]
-    print(f"\n{'─' * 54}")
-    print(f"  Transaktions-Übersicht  ({len(content)} Einträge)")
-    print(f"{'─' * 54}")
-    print(tabulate(content, headers=headers, tablefmt="outline",
-                   floatfmt=".2f"))
-
-
-def bank_balance(database: sqlite3.Connection) -> float:
-    """
-    Gibt den aktuellen Kontostand zurück (Saldo der letzten Buchung nach ID).
-    Gibt ihn auch direkt in der Konsole aus.
-    """
-    cursor = database.cursor()
-    cursor.execute("""
-        SELECT saldo_nach_buchung
-        FROM transaktionen
-        ORDER BY buchungs_id DESC
-        LIMIT 1
-    """)
-    row = cursor.fetchone()
-    if row is None:
-        print("\n  Keine Buchungen in der Datenbank gefunden.")
-        return 0.0
-    saldo = row[0]
-    print(f"\n{'─' * 54}")
-    print(f"  Aktueller Kontostand : {saldo:>12.2f} EUR")
-    print(f"{'─' * 54}")
-    return saldo
-
+#
+#
+#
+#
+# siehe request/request.py
+#
+#
+#
 
 # ──────────────────────────────────────────────
 # HAUPTPROGRAMM
