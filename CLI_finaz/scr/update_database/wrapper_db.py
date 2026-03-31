@@ -27,12 +27,9 @@ def update_verwendung_to_kategorie(database):
             if any(wort in zweck for wort in search_data_test):
                 cursor.execute("""  
                 UPDATE transaktionen
-                SET verwendungszweck = "LEBENlol"
+                SET verwendungszweck = "Lebensmittel"
                 WHERE buchungs_id = ?
-                """, (id,))
-            
-
-
+                """, (id,))         
     else:
         print("  Noch keine Daten in der Datenbank.")
         print(f"{'─' * 70}\n")
