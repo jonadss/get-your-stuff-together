@@ -16,7 +16,7 @@ DB_PFAD = PROJEKT_DIR / "db" / "transaktion.db"
 # Auswertung-FUNKTIONEN
 # ──────────────────────────────────────────────
 
-def overview(database: sqlite3.Connection) -> None:
+def overview(database: sqlite3.Connection) -> None:veloper, you work with a lot of text resources: the source code in the editor, search results, debugger information, con
     """
     Zeigt alle Transaktionen chronologisch – neueste Buchung oben.
 
