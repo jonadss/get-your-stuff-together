@@ -4,39 +4,48 @@ from ui_toolkit import *
 #Import von ui_styles.py
 from ui_styles import UI
 
+##########################################################
+#####habs nichts gemacht daran#########################
+###########################################################################
 
-def start_app():
+
+def start_categories():
+    
     start_ui = UI()
-    start_ui.draw_header("start")
-
-    command = ["start", "help", "exit"]
+    start_ui.draw_header("start_categories")
+    
+    command = ["start", "help", "exit", "back"]
     command_completer = WordCompleter(command, ignore_case=True)
 
     while True:
         try:
             user_input = prompt(
-                "euer volk hungert mein lord  ", 
+                "categories -- enter command: ", 
                 completer=command_completer
             ).strip().lower()
 
             if user_input == "exit":
                 break
-            
+            elif user_input == "back":
+                start_app()
+                break
+
             elif user_input == "help":
                 print("no help for you")
 
             elif user_input == "start":
                 start_ui.draw_header("you will be forwarded")
-                start_balance_overview()
-                break
-        
-        
-        
-        
+                co
+    
 
-        
-        
-        
+
+
+
+
+
+
+
+
             elif user_input == "":
                 continue
             else: 
@@ -51,5 +60,9 @@ def start_app():
 
 
 
+
+
+
+
 if __name__ == "__main__":
-    start_app()
+    start_balance_overview()
