@@ -27,8 +27,7 @@ def start_budget():
             if user_input == "exit":
                 break
             elif user_input == "back":
-                back_to_layer2()
-                break
+                return
 
             elif user_input == "help":
                 print("no help for you")
