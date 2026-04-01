@@ -25,7 +25,7 @@ def start_debts():
             if user_input == "exit":
                 break
             elif user_input == "back":
-                start_app()
+                back_to_layer2()
                 break
 
             elif user_input == "help":

@@ -16,6 +16,8 @@ from app_balance_overview import start_balance_overview
 from app_categories import start_categories
 from app_debts import start_debts
 from app_importer import start_importer
+from app_budget import start_budget
+
 
 
 
