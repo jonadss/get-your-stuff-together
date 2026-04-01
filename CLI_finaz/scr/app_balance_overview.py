@@ -9,7 +9,7 @@ def start_balance_overview():
 
 
     start_ui = UI()
-    start_ui.draw_header("start_balance_overview")
+    start_ui.draw_header("start_balance_overview")  
     
     command = ["budget","categories","debts","importer", "help", "exit", "back"]
     command_completer = WordCompleter(command, ignore_case=True)
