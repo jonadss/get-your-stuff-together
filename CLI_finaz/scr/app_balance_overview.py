@@ -1,13 +1,13 @@
 #Import von ui_toolkit 
-from ui_toolkit import *
-
-#Import von ui_styles.py
 from ui_styles import UI
 
-
+#Import von ui_styles.py
+from ui_toolkit import *
 
 def start_balance_overview():
     
+
+
     start_ui = UI()
     start_ui.draw_header("start_balance_overview")
     
@@ -24,8 +24,8 @@ def start_balance_overview():
             if user_input == "exit":
                 break
             elif user_input == "back":
-                start_app()
-                break
+                return
+                
 
             elif user_input == "help":
                 print("no help for you")
@@ -35,17 +35,24 @@ def start_balance_overview():
 
 
             elif user_input == "categories":
+                from app_categories import start_categories
                 start_ui.draw_header("you will be forwarded")
-                start_app()
+                start_categories()
+
             elif user_input == "debts":
+                from app_debts import start_debts
                 start_ui.draw_header("you will be forwarded")
-                start_app()
+                start_debts()
+            
             elif user_input == "importer":
+                from app_importer import start_importer
                 start_ui.draw_header("you will be forwarded")
-                start_app() 
-            elif user_input == "start":
+                start_importer()
+            
+            elif user_input == "budget":
+                from app_budget import start_budget
                 start_ui.draw_header("you will be forwarded")
-                start_app()
+                start_budget()
 
 
 

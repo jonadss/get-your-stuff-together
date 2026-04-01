@@ -9,10 +9,10 @@ from ui_styles import UI
 ###########################################################################
 
 
-def start_categories():
+def start_budget():
     
     start_ui = UI()
-    start_ui.draw_header("start_categories")
+    start_ui.draw_header("start_budget")
     
     command = ["start", "help", "exit", "back"]
     command_completer = WordCompleter(command, ignore_case=True)
@@ -27,7 +27,7 @@ def start_categories():
             if user_input == "exit":
                 break
             elif user_input == "back":
-                start_app()
+                back_to_layer2()
                 break
 
             elif user_input == "help":
@@ -35,7 +35,7 @@ def start_categories():
 
             elif user_input == "start":
                 start_ui.draw_header("you will be forwarded")
-                co
+                
     
 
 

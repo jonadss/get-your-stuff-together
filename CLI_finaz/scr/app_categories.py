@@ -24,15 +24,14 @@ def start_categories():
             if user_input == "exit":
                 break
             elif user_input == "back":
-                start_app()
-                break
+                return
 
             elif user_input == "help":
                 print("no help for you")
 
             elif user_input == "start":
                 start_ui.draw_header("you will be forwarded")
-                co
+                
     
 
 
