@@ -1,134 +1,114 @@
+from rich.text import Text
 from rich.console import Console
 from rich.panel import Panel
+from rich.table import Table
+from rich.align import Align
 from rich import box
-from rich.live import Live
-
-import time 
-
-from prompt_toolkit import prompt
-from prompt_toolkit.completion import WordCompleter
 
 console = Console()
 
-def start_app():
-    console.print(Panel("[bold blue]Mein CLI Interface[/bold blue]", subtitle="v1.0"))
-    
-    # Hier definieren wir die Wörter für die Vervollständigung
-    befehle = ["print", "hilfe", "beenden", "status", "einstellungen"]
-    befehl_completer = WordCompleter(befehle, ignore_case=True)
-    
-    while True:
-        try:
-            # Wir nutzen prompt() von prompt_toolkit statt Prompt.ask
-            # 'completer' aktiviert die Tab-Vervollständigung
-            user_input = prompt(
-                "Was möchtest du tun? > ", 
-                completer=befehl_completer
-            ).strip().lower()
+def make_frog():
+    t = Text("""
+  @..@
+ (----)
+( >__< )
+^^ ~~ ^^
+""", style="green")
+    t.highlight_regex(r"@",      "bold red")
+    t.highlight_regex(r"\^",     "black")
+    t.highlight_regex(r"-+",     "white")
+    t.highlight_regex(r"[\(\)]", "yellow")
+    return t
+
+title  = "[bold cyan]Finanz-App[/]"
+status = "[bold green]● Online[/]"
+info   = "[yellow]Kontostand: 1.234 €[/]"
+warn   = "[bold red]⚠ Warnung![/]"
 
 
+# ════════════════════════════════════════════════════════════════════
+# 1) Frosch links – Titel rechts  (2 Spalten)
+# ════════════════════════════════════════════════════════════════════
+grid1 = Table.grid(expand=True)
+grid1.add_column(justify="left")
+grid1.add_column(justify="right")
+grid1.add_row(make_frog(), Align.right(title))
+
+console.print(Panel(grid1, title="Beispiel 1 · links / rechts", border_style="cyan"))
 
 
-            if user_input == "beenden":
-                break
-            
+# ════════════════════════════════════════════════════════════════════
+# 2) 3 Spalten  – Frosch mitte zentriert
+# ════════════════════════════════════════════════════════════════════
+grid2 = Table.grid(expand=True)
+grid2.add_column(justify="left")
+grid2.add_column(justify="center")   # ← Frosch kommt hier rein
+grid2.add_column(justify="right")
+grid2.add_row(status, make_frog(), info)
+
+console.print(Panel(grid2, title="Beispiel 2 · 3 Spalten", border_style="green"))
 
 
+# ════════════════════════════════════════════════════════════════════
+# 3) Mehrere Zeilen  – Frosch fix in Zeile 2, Spalte 1
+#
+#   [ Titel         ] [ Status ]
+#   [ Frosch 🐸     ] [ Info   ]
+#   [ Warnung       ] [ leer   ]
+# ════════════════════════════════════════════════════════════════════
+grid3 = Table.grid(expand=True)
+grid3.add_column(justify="left",  ratio=2)
+grid3.add_column(justify="right", ratio=1)
+
+grid3.add_row(title,       status)   # Zeile 1
+grid3.add_row(make_frog(), info)     # Zeile 2  ← Frosch
+grid3.add_row(warn,        "")       # Zeile 3
+
+console.print(Panel(grid3, title="Beispiel 3 · mehrere Zeilen", border_style="yellow"))
 
 
-            elif user_input == "print":
-                console.print(Panel.fit(
-                    "Rechenvorgang läuft...", 
-                    title="Status", 
-                    border_style="red",
-                    padding=(1, 4),
-                    style="#ff91b2 on #636363",
-                    ))
-                
-                console.print(Panel(
-                    "lol",
-                    title= "Dicker Rahmen für wichtige Infos.",
-                    box=box.HEAVY,
-                    border_style="blue",
-                    width = 15,
-                    padding=(1, 1)
+# ════════════════════════════════════════════════════════════════════
+# 4) ratio – Spaltenbreite prozentual steuern
+#    Frosch bekommt 1/4, Rest-Info 3/4
+# ════════════════════════════════════════════════════════════════════
+grid4 = Table.grid(expand=True)
+grid4.add_column(ratio=1)   # 25 % → Frosch
+grid4.add_column(ratio=3)   # 75 % → Text
 
-                ))
-                frames = [
-                    "( o.o )",
-                    "( -.- )",
-                    "( o.o )",
-                    "( >.< )"
-                ]
+grid4.add_row(
+    make_frog(),
+    Align.center(
+        "[bold]Willkommen![/]\n\nDein Kontostand beträgt\n[bold green]1.234 €[/]",
+        vertical="middle",
+    ),
+)
 
-                with Live(refresh_per_second=4) as live:
-                    for _ in range(15): 
-                        for frame in frames:
-                            # Wir aktualisieren das Panel im Live-Modus
-                            live.update(Panel(
-                                frame, 
-                                title="Bot animiert", 
-                                border_style="cyan",
-                                high = 4,
-                                width = 4,
-                                padding = (3,1)))
-                            time.sleep(0.2)
+console.print(Panel(grid4, title="Beispiel 4 · ratio (25/75)", border_style="magenta"))
 
 
+# ════════════════════════════════════════════════════════════════════
+# 5) Grid im Grid  – Header + Body getrennt aufgebaut
+#
+#   ┌─────────────────────────────────────┐
+#   │  [Frosch]   App-Titel    [Status]   │  ← Header-Grid
+#   ├─────────────────────────────────────┤
+#   │  Info links  │  Warnung rechts      │  ← Body-Grid
+#   └─────────────────────────────────────┘
+# ════════════════════════════════════════════════════════════════════
+header = Table.grid(expand=True)
+header.add_column(justify="left")
+header.add_column(justify="center")
+header.add_column(justify="right")
+header.add_row(make_frog(), title, status)
 
+body = Table.grid(expand=True)
+body.add_column(justify="left",  ratio=1)
+body.add_column(justify="right", ratio=1)
+body.add_row(info, warn)
 
+outer = Table.grid(expand=True)
+outer.add_column()
+outer.add_row(Panel(header, border_style="cyan"))
+outer.add_row(Panel(body,   border_style="yellow"))
 
-
-                break
-
-
-                
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-            elif user_input == "hilfe":
-                console.print("[yellow]Verfügbare Befehle:[/yellow]", ", ".join(befehle))
-            
-
-
-
-
-
-
-
-            #skip
-            elif user_input == "":
-                continue
-                
-            else: 
-                console.print(f"[red]Unbekannter Befehl:[/red] {user_input}")
-
-
-
-
-
-
-
-
-
-
-        except KeyboardInterrupt: # Fängt Strg+C ab
-            break
-        except EOFError: # Fängt Strg+D ab
-            break
-
-    console.print("[bold red]Programm beendet.[/bold red]")
-
-if __name__ == "__main__":
-    start_app()
+console.print(Panel(outer, title="Beispiel 5 · Grid im Grid", border_style="white"))
