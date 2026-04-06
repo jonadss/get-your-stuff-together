@@ -12,13 +12,15 @@ from prompt_toolkit.completion import WordCompleter
 from rich.text import Text
 
 
-from main import start_app
-from app_balance_overview import start_balance_overview
-from app_categories import start_categories
-from app_debts import start_debts
-from app_importer import start_importer
-from app_budget import start_budget
+#from main import start_app
+#from app_balance_overview import start_balance_overview
+#from app_categories import start_categories
+#from app_debts import start_debts
+#from app_importer import start_importer
+#from app_budget import start_budget
 
+
+import sys
 
 
 console = Console()

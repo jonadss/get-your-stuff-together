@@ -70,10 +70,10 @@ def start_balance_overview():
 
         # Fängt Strg+C ab
         except KeyboardInterrupt: 
-            break
+            return sys.exit(0)
         # Fängt Strg+D ab
         except EOFError: 
-            break
+            return sys.exit(0)
 
 
 
