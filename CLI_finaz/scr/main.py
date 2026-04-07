@@ -303,10 +303,10 @@ def start_debts():
 def start_importer():
     
     start_ui = UI()
-    start_ui.draw_menu_panel("importer")
+    start_ui.draw_importer_panel("importer")
 
     
-    command = ["start", "help", "exit", "back"]
+    command = ["choose path","import", "help", "exit", "back"]
     command_completer = WordCompleter(command, ignore_case=True)
 
     while True:
@@ -324,8 +324,10 @@ def start_importer():
             elif user_input == "help":
                 print("no help for you")
 
-            elif user_input == "start":
-                start_ui.draw_header("you will be forwarded")
+            elif user_input == "choose path":
+                from import_csv import user_interaktion
+                new_path = user_interaktion()
+                start_ui.draw_importer_panel("importer",new_path)
                 
 
 

@@ -2,6 +2,8 @@ from ui_toolkit import *
 import datetime
 import time
 import random
+import sys
+
 
 
 class UI:
@@ -10,7 +12,7 @@ class UI:
         self.box_style = box.ROUNDED
 
     def draw_header(self, title):
-        self.console.print(Panel(title, style="bold magenta", box=self.box_style))
+        self.console.print(Panel(title, style="bold magenta", box=box.MINIMAL))
 
 
 
@@ -67,6 +69,45 @@ class UI:
 
         self.console.print(panel)
 
+    def draw_importer_panel(self,middle_title,path=None):
+
+
+        current_date, current_time, app_status, app_title = self.get_context()
+        
+        frog_img = self.small_frog()
+
+
+  
+
+        grid = Table.grid(expand=True)
+        grid.add_column(ratio=1)
+        grid.add_column(ratio=3)
+        grid.add_column(ratio=1)
+
+
+        text_middle_text = Text(middle_title,style= "#fa7ff6")
+        text_path        = Text(str(path), style="italic #808080") 
+
+        grid.add_row(
+        frog_img,
+        Align.center(Group(text_middle_text, text_path), vertical="middle"),  # ← korrekt
+        Align.right(
+            Group(current_date, current_time),
+            vertical="top"
+        )
+    )
+
+        panel = Panel(
+                    grid, 
+                    title=app_title, 
+                    border_style="bold blue", 
+    
+        )
+
+
+
+        self.console.print(panel)
+
 
 
     def play_loading(self, text="Lade Daten...", length=18):
@@ -111,7 +152,7 @@ class UI:
                 live.update(self._build_grid_panel(wink=is_winking, middle_title="Good byeeee"))
                 time.sleep(0.1)
             live.update(self._build_grid_panel(wink=False, middle_title="Good byeeee"))
-        self.sytem_exit()
+        sys.exit(1)
         
 
 
@@ -213,6 +254,66 @@ class UI:
         return date,time_now,status,title_text
 
 
+
+
+### ── In ui_styles.py einfügen (neue Methode in der UI-Klasse) ───────────────
+
+    def draw_file_browser(self, aktueller_pfad, eintraege):
+
+        current_date, current_time, app_status, app_title = self.get_context()
+
+        table = Table(
+            box=box.SIMPLE,
+            show_header=True,
+            header_style="bold #fa7ff6",
+            expand=True,
+            padding=(0, 1),
+        )
+        table.add_column("Typ",  width=10)
+        table.add_column("Name", ratio=1)
+
+        
+
+        for e in eintraege:
+            if e.is_dir():
+                icon = Text("📁 Ordner", style="blue")
+                name = Text(e.name,      style="bold white")
+            elif e.suffix.lower() == ".csv":
+                icon = Text("📄 CSV",    style="bold green")
+                name = Text(e.name,      style="bold green")
+            else:
+                icon = Text("   Datei",  style="#555555")
+                name = Text(e.name,      style="#888888")
+            table.add_row(icon, name)
+
+        
+        path_text = Text(str(aktueller_pfad), style="italic #fa7ff6")
+
+
+        frog_with_padding = self.small_frog()
+
+
+
+        grid = Table.grid(expand=True)
+        grid.add_column(justify="left", vertical="middle", ratio=1)
+        grid.add_column(ratio=8)
+       
+
+        grid.add_row(
+            Align.left(frog_with_padding),
+            Group(Align.center(path_text), table)#,
+            #Align.right(Group("", current_date, current_time)),
+        )
+
+        self.console.print(
+            Panel(
+                grid,
+                title=app_title,
+                subtitle="[bold #808080]Enter = back | exit = quit[/]",
+                border_style="bold blue",
+                box=self.box_style,
+            )
+        )
 
 
 ###########################################################
