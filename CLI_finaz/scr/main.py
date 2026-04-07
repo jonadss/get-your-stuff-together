@@ -9,6 +9,11 @@ def start_app():
     start_ui = UI()
     start_ui.draw_welcom_panel(2)
 
+    
+
+
+
+
     command = ["start", "help", "exit"]
     command_completer = WordCompleter(command, ignore_case=True)
 
@@ -20,7 +25,8 @@ def start_app():
             ).strip().lower()
 
             if user_input == "exit":
-                break
+                start_ui.draw_exit_panel()
+            
             
             elif user_input == "help":
                 print("no help for you")
@@ -28,15 +34,11 @@ def start_app():
             elif user_input == "start":
                 start_ui.play_loading("Load bank balance ...")
                 start_balance_overview()
+                start_ui.draw_welcom_panel(1)
                 
         
         
-        
-        
-
-        
-        
-        
+   
             elif user_input == "":
                 continue
             else: 
@@ -44,21 +46,32 @@ def start_app():
 
         # Fängt Strg+C ab
         except KeyboardInterrupt: 
-            break
+            start_ui.draw_exit_panel()
+
         # Fängt Strg+D ab
         except EOFError: 
-            break
+            start_ui.draw_exit_panel()
+            
 
 
 def start_balance_overview():
-    
-
-
+  
     start_ui = UI()
-    start_ui.draw_header("start_balance_overview")  
+
     
     command = ["budget","categories","debts","importer", "help", "exit", "back"]
     command_completer = WordCompleter(command, ignore_case=True)
+
+
+
+
+    def draw_balance_overview():
+        start_ui = UI()
+        start_ui.draw_menu_panel("balance_overview")
+
+
+    draw_balance_overview()
+
 
     while True:
         try:
@@ -68,7 +81,7 @@ def start_balance_overview():
             ).strip().lower()
 
             if user_input == "exit":
-                sys.exit(1)
+                start_ui.draw_exit_panel()
             elif user_input == "back":
                 return
                 
@@ -81,24 +94,28 @@ def start_balance_overview():
 
 
             elif user_input == "categories":
-                from app_categories import start_categories
-                start_ui.draw_header("you will be forwarded")
+                
+                start_ui.play_loading("Load categories" )
                 start_categories()
+                draw_balance_overview()
 
             elif user_input == "debts":
-                from app_debts import start_debts
-                start_ui.draw_header("you will be forwarded")
+                
+                start_ui.play_loading("Load debts" )
                 start_debts()
+                draw_balance_overview()
             
             elif user_input == "importer":
-                from app_importer import start_importer
-                start_ui.draw_header("you will be forwarded")
+                
+                start_ui.play_loading("Load importer" )
                 start_importer()
+                draw_balance_overview()
             
             elif user_input == "budget":
-                from app_budget import start_budget
-                start_ui.draw_header("you will be forwarded")
+
+                start_ui.play_loading("Load budget" )
                 start_budget()
+                draw_balance_overview()
 
 
 
@@ -110,20 +127,19 @@ def start_balance_overview():
 
         # Fängt Strg+C ab
         except KeyboardInterrupt: 
-            return sys.exit(0)
+            start_ui.draw_exit_panel()
+            
         # Fängt Strg+D ab
         except EOFError: 
-            return sys.exit(0)
+            start_ui.draw_exit_panel()
+            
 
-##########################################################
-#####habs nichts gemacht daran#########################
-###########################################################################
 
 
 def start_budget():
     
     start_ui = UI()
-    start_ui.draw_header("start_budget")
+    start_ui.draw_menu_panel("budget")
     
     command = ["start", "help", "exit", "back"]
     command_completer = WordCompleter(command, ignore_case=True)
@@ -136,7 +152,7 @@ def start_budget():
             ).strip().lower()
 
             if user_input == "exit":
-                break
+                start_ui.draw_exit_panel()
             elif user_input == "back":
                 return
 
@@ -163,10 +179,10 @@ def start_budget():
 
         # Fängt Strg+C ab
         except KeyboardInterrupt: 
-            break
+            start_ui.draw_exit_panel()
         # Fängt Strg+D ab
         except EOFError: 
-            break
+            start_ui.draw_exit_panel()
 
 
 
@@ -174,7 +190,8 @@ def start_budget():
 def start_categories():
     
     start_ui = UI()
-    start_ui.draw_header("start_categories")
+    start_ui.draw_menu_panel("budget")
+
     
     command = ["start", "help", "exit", "back"]
     command_completer = WordCompleter(command, ignore_case=True)
@@ -187,7 +204,7 @@ def start_categories():
             ).strip().lower()
 
             if user_input == "exit":
-                break
+                start_ui.draw_exit_panel()
             elif user_input == "back":
                 return
 
@@ -214,10 +231,10 @@ def start_categories():
 
         # Fängt Strg+C ab
         except KeyboardInterrupt: 
-            break
+            start_ui.draw_exit_panel()
         # Fängt Strg+D ab
         except EOFError: 
-            break
+            start_ui.draw_exit_panel()
 
 
 
@@ -232,7 +249,8 @@ def start_categories():
 def start_debts():
     
     start_ui = UI()
-    start_ui.draw_header("start_debts")
+    start_ui.draw_menu_panel("debts")
+
     
     command = ["start", "help", "exit", "back"]
     command_completer = WordCompleter(command, ignore_case=True)
@@ -245,7 +263,7 @@ def start_debts():
             ).strip().lower()
 
             if user_input == "exit":
-                break
+                start_ui.draw_exit_panel()
             elif user_input == "back":
                 return
 
@@ -272,10 +290,10 @@ def start_debts():
 
         # Fängt Strg+C ab
         except KeyboardInterrupt: 
-            break
+            start_ui.draw_exit_panel()
         # Fängt Strg+D ab
         except EOFError: 
-            break
+            start_ui.draw_exit_panel()
 
 
 
@@ -285,7 +303,8 @@ def start_debts():
 def start_importer():
     
     start_ui = UI()
-    start_ui.draw_header("start_importer")
+    start_ui.draw_menu_panel("importer")
+
     
     command = ["start", "help", "exit", "back"]
     command_completer = WordCompleter(command, ignore_case=True)
@@ -298,7 +317,7 @@ def start_importer():
             ).strip().lower()
 
             if user_input == "exit":
-                break
+                start_ui.draw_exit_panel()
             elif user_input == "back":
                 return
 
@@ -324,10 +343,10 @@ def start_importer():
 
         # Fängt Strg+C ab
         except KeyboardInterrupt: 
-            break
+            start_ui.draw_exit_panel()
         # Fängt Strg+D ab
         except EOFError: 
-            break
+            start_ui.draw_exit_panel()
 
 
 
