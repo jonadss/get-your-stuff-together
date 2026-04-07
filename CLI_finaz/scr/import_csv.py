@@ -8,6 +8,9 @@ from pathlib import Path
 from datetime import datetime
 from tabulate import tabulate
 
+from ui_toolkit import *
+from ui_styles import UI
+
 
 # ──────────────────────────────────────────────
 # PFADE  (relativ zum Skript-Verzeichnis)
@@ -16,7 +19,7 @@ from tabulate import tabulate
 SKRIPT_DIR = Path(__file__).parent                          
 PROJEKT_DIR = SKRIPT_DIR.parent                             
 
-CSV_PFAD = SKRIPT_DIR / "csv" / "kontoauszug.csv"
+CSV_PFAD = SKRIPT_DIR
 DB_PFAD  = PROJEKT_DIR / "db" / "transaktion.db"
 
 
@@ -30,7 +33,7 @@ SPALTE_BIC_KONTO         = "BIC Auftragskonto"
 SPALTE_BANKNAME          = "Bankname Auftragskonto"
 SPALTE_BUCHUNGSTAG       = "Buchungstag"
 SPALTE_VALUTADATUM       = "Valutadatum"
-SPALTE_NAME_PARTNER      = "Name Zahlungsbeteiligter"
+SPALTE_NAME_PARTNER      = "Namefrom ui_toolkit import * Zahlungsbeteiligter"
 SPALTE_IBAN_PARTNER      = "IBAN Zahlungsbeteiligter"
 SPALTE_BIC_PARTNER       = "BIC (SWIFT-Code) Zahlungsbeteiligter"
 SPALTE_BUCHUNGSTEXT      = "Buchungstext"
@@ -243,24 +246,9 @@ def bericht_ausgeben(gesamt: int, neu: int, start: datetime) -> None:
     print(f"{'=' * 54}\n")
 
 
-# ──────────────────────────────────────────────
-# AUSWERTUNGS-FUNKTIONEN
-# ──────────────────────────────────────────────
 
-#
-#
-#
-#
-# siehe request/request.py
-#
-#
-#
 
-# ──────────────────────────────────────────────
-# HAUPTPROGRAMM
-# ──────────────────────────────────────────────
-
-def main() -> None:
+def main():
     start = datetime.now()
     print(f"\nStarte Import ...")
     print(f"  Quelle    : {CSV_PFAD}")
@@ -295,5 +283,96 @@ def main() -> None:
         print(f"\nFEHLER (Datenbank): {e}")
         sys.exit(1)
 
-if __name__ == "__main__":
-    main()
+
+
+###########################################################
+###########################################################
+###########################################################
+##########################User Interaktion#################
+###########################################################
+###########################################################
+###########################################################
+
+def waehle_csv_interaktiv(start_dir):
+
+    ui = UI()
+    aktueller_pfad = Path(start_dir).resolve()
+
+    while True:
+        try:
+            eintraege = sorted(
+                list(aktueller_pfad.iterdir()),
+                key=lambda x: (not x.is_dir(), x.name.lower())
+            )
+        except PermissionError:
+            ui.draw_header(f"[red]Zugriff verweigert:[/red] {aktueller_pfad}")
+            aktueller_pfad = aktueller_pfad.parent
+            continue
+
+        # ── Panel zeichnen ───────────────────────────────────────────────────
+        ui.draw_file_browser(aktueller_pfad, eintraege)
+
+        # ── Autovervollständigung ────────────────────────────────────────────
+        verfuegbare_namen = [e.name for e in eintraege]
+        if aktueller_pfad.parent != aktueller_pfad:
+            verfuegbare_namen.append("..")
+        verfuegbare_namen.append("exit")
+
+        completer = WordCompleter(verfuegbare_namen, ignore_case=True)
+
+        # ── Eingabe ──────────────────────────────────────────────────────────
+        try:
+            user_input = prompt(
+                "importer -- wähle Datei: ",
+                completer=completer,
+            ).strip()
+        except (KeyboardInterrupt, EOFError):
+            return None
+
+        if user_input.lower() == "exit":
+            return None
+
+        if user_input == "":
+            aktueller_pfad = aktueller_pfad.parent
+            continue
+
+        neuer_pfad = (aktueller_pfad / user_input).resolve()
+
+        if not neuer_pfad.exists():
+            ui.draw_header(f"[red]Nicht gefunden:[/red] '{user_input}'")
+            continue
+
+        if neuer_pfad.is_dir():
+            aktueller_pfad = neuer_pfad
+
+        elif neuer_pfad.is_file():
+            if neuer_pfad.suffix.lower() == ".csv":
+                return neuer_pfad
+            else:
+                ui.draw_header(f"[red]Keine CSV-Datei:[/red] {neuer_pfad.name}")
+
+
+
+
+
+
+def user_interaktion():
+    SKRIPT_DIR  = Path(__file__).parent
+    PROJEKT_DIR = SKRIPT_DIR.parent
+
+    CSV_PFAD = waehle_csv_interaktiv(PROJEKT_DIR)
+
+    ui = UI()
+    if CSV_PFAD:
+        ui.draw_header(f"[green]Ausgewählt:[/green] {CSV_PFAD}")
+        return CSV_PFAD
+    else:
+        ui.draw_header(f"[red]Keine Datei ausgewählt.[/red]")
+
+        return None
+
+
+
+def return_csv_pfad():
+    return CSV_PFAD
+
