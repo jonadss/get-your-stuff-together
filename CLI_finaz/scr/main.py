@@ -4,6 +4,10 @@ from ui_toolkit import *
 #Import von ui_styles.py
 from ui_styles import UI
 
+from request import overview, start_saldo_request, DB_PFAD
+import sqlite3
+
+
 
 def start_app():
     start_ui = UI()
@@ -32,6 +36,7 @@ def start_app():
                 print("no help for you")
 
             elif user_input == "start":
+
                 start_ui.play_loading("Load bank balance ...")
                 start_balance_overview()
                 start_ui.draw_welcom_panel(1)
@@ -55,11 +60,11 @@ def start_app():
 
 
 def start_balance_overview():
-  
+    
     start_ui = UI()
 
     
-    command = ["importer","categories","debts","budget", "help", "exit", "back"]
+    command = ["show history","importer","categories","debts","budget", "help", "exit", "back"]
     command_completer = WordCompleter(command, ignore_case=True)
 
 
@@ -67,7 +72,9 @@ def start_balance_overview():
 
     def draw_balance_overview():
         start_ui = UI()
-        start_ui.draw_menu_panel("balance_overview")
+        
+        new_saldo = start_saldo_request()
+        start_ui.draw_balance_overview_panel(saldo=new_saldo)
 
 
     draw_balance_overview()
@@ -98,6 +105,14 @@ def start_balance_overview():
                 start_ui.play_loading("Load categories" )
                 start_categories()
                 draw_balance_overview()
+
+
+            elif user_input == "show history":
+                start_ui.play_loading("Load history...")
+                rows = overview(sqlite3.connect(DB_PFAD))
+                start_ui.draw_overview_table(rows)
+                            
+
 
             elif user_input == "debts":
                 

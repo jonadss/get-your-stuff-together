@@ -14,7 +14,7 @@ from rich.text import Text
 
 
 from pathlib import Path
-
+import sqlite3
 
 
 #from main import start_app

@@ -69,6 +69,106 @@ class UI:
 
         self.console.print(panel)
 
+
+    def draw_balance_overview_panel(self,middle_title="balance_overview",saldo = None):
+
+
+        current_date, current_time, app_status, app_title = self.get_context()
+        
+        frog_img = self.small_frog()
+
+        grid = Table.grid(expand=True)
+        grid.add_column(ratio=1)
+        grid.add_column(ratio=3)
+        grid.add_column(ratio=1)
+        text_middle_text = Text(middle_title,style= "#fa7ff6")
+        
+        text_saldo_text = Text(f"{saldo:.2f} €" if saldo is not None else "–", style="#fa7ff6")
+
+        grid.add_row(
+            frog_img,
+            Align.center(Group(text_middle_text, text_saldo_text), vertical="middle"),
+            Align.right(
+                Group( current_date, current_time), 
+                vertical="top"
+            )
+        )
+
+        panel = Panel(
+                    grid, 
+                    title=app_title, 
+                    border_style="bold blue", 
+    
+        )
+    
+    
+    
+        self.console.print(panel)
+    
+    def draw_overview_table(self, transaktionen: list):
+    
+        breite = self.console.width
+        zeige_saldo = breite >= 80
+        zeige_zweck = breite >= 60
+    
+        table = Table(
+            box=box.SIMPLE,
+            show_header=True,
+            header_style="bold #fa7ff6",
+            expand=True,
+            padding=(0, 1),
+        )
+    
+        table.add_column("Datum",      width=12, justify="center")
+        table.add_column("Betrag (€)", width=14, justify="right")
+        if zeige_saldo:
+            table.add_column("Saldo (€)", width=14, justify="right")
+        if zeige_zweck:
+            table.add_column("Verwendungszweck", ratio=1)
+    
+        for row in transaktionen:
+            buchungs_id, datum, betrag, saldo, zweck = row
+    
+            betrag_style = "bold green" if betrag >= 0 else "bold red"
+            zeile = [
+                Text(str(datum), style="italic white"),
+                Text(f"{betrag:>+.2f}", style=betrag_style),
+            ]
+            if zeige_saldo:
+                zeile.append(Text(f"{saldo:.2f}", style="white"))
+            if zeige_zweck:
+                max_len = max(20, breite - 60)
+                zweck_roh = str(zweck or "–")
+                zweck_kurz = zweck_roh[:max_len] + "…" if len(zweck_roh) > max_len else zweck_roh
+                zeile.append(Text(zweck_kurz, style="#888888"))
+    
+            table.add_row(*zeile)
+    
+        titel_text = Text(
+            f"Transaktions-Übersicht  –  {len(transaktionen)} Einträge  (neueste oben)",
+            style="#fa7ff6"
+        )
+    
+        panel = Panel(
+            Group(Align.center(titel_text), table),
+            title="[bold green]Finanz-App[/]",
+            border_style="bold blue",
+            box=self.box_style,
+        )
+    
+        # In String rendern (mit Farben als ANSI-Codes)
+        import io
+        from rich.console import Console as RichConsole
+        buf = io.StringIO()
+        tmp = RichConsole(file=buf, width=breite, highlight=False, force_terminal=True)
+        tmp.print(panel)
+        inhalt = buf.getvalue()
+    
+        # Über less ausgeben – bleibt am Anfang, q zum Beenden
+        import subprocess
+        subprocess.run(["less", "-R", "-S", "--prompt= Scrollen: Pfeiltasten | q = zurück"], 
+                       input=inhalt, text=True)
+
     def draw_importer_panel(self,middle_title,path=None):
 
 
