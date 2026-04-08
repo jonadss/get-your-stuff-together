@@ -59,7 +59,7 @@ def start_balance_overview():
     start_ui = UI()
 
     
-    command = ["budget","categories","debts","importer", "help", "exit", "back"]
+    command = ["importer","categories","debts","budget", "help", "exit", "back"]
     command_completer = WordCompleter(command, ignore_case=True)
 
 
@@ -330,6 +330,9 @@ def start_importer():
                 start_ui.draw_importer_panel("importer",new_path)
                 
 
+            elif user_input == "import":
+                from import_csv import main_import
+                main_import()
 
 
 

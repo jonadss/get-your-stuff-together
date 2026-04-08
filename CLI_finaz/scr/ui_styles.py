@@ -3,7 +3,7 @@ import datetime
 import time
 import random
 import sys
-
+import os
 
 
 class UI:
@@ -255,8 +255,9 @@ class UI:
 
 
 
-
-### ── In ui_styles.py einfügen (neue Methode in der UI-Klasse) ───────────────
+###########################################################
+#########################Importer##########################
+###########################################################
 
     def draw_file_browser(self, aktueller_pfad, eintraege):
 
@@ -314,6 +315,40 @@ class UI:
                 box=self.box_style,
             )
         )
+
+
+    def draw_import_start(self, csv_pfad, db_pfad):
+        grid = Table.grid(expand=True)
+        grid.add_column()
+        grid.add_row(Text("Starte Import...", style="bold #fa7ff6"))
+        grid.add_row(Text(f"Quelle : {csv_pfad}", style="italic white"))
+        grid.add_row(Text(f"Ziel   : {db_pfad}", style="italic white"))
+
+        self.console.print(Panel(grid, border_style="bold blue", box=box.MINIMAL))
+
+
+    def draw_import_bericht(self, csv_pfad, db_pfad, gesamt, neu, start):
+        duplikate  = gesamt - neu
+        db_groesse = os.path.getsize(db_pfad) / 1024
+
+        grid = Table.grid(expand=True, padding=(0, 1))
+        grid.add_column(style="bold #808080")
+        grid.add_column(style="white")
+
+        grid.add_row("CSV",                   str(csv_pfad))
+        grid.add_row("Datenbank",             f"{db_pfad}  ({db_groesse:.1f} KB)")
+        grid.add_row("",                      "")
+        grid.add_row("CSV-Zeilen gesamt",     f"{gesamt:>6}")
+        grid.add_row("Neu importiert",        Text(f"{neu:>6}",       style="bold green"))
+        grid.add_row("Duplikate ignoriert",   Text(f"{duplikate:>6}", style="bold yellow"))
+
+        self.console.print(Panel(
+            grid,
+            title="[bold green]Import abgeschlossen[/]",
+            border_style="green",
+            box=self.box_style,
+        ))
+
 
 
 ###########################################################
