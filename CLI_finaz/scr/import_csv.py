@@ -123,6 +123,7 @@ def csv_laden(pfad: Path) -> pd.DataFrame:
 
     if not pfad.is_file():
         raise FileNotFoundError(f"CSV nicht gefunden: '{pfad}'")
+        return
 
     for encoding in ("utf-8-sig", "latin-1"):
         try:
@@ -229,49 +230,36 @@ def zeilen_importieren(df: pd.DataFrame, conn: sqlite3.Connection) -> tuple:
 
 
 def bericht_ausgeben(gesamt: int, neu: int, start: datetime) -> None:
-    """Konsolenausgabe nach dem Import."""
-    duplikate  = gesamt - neu
-    db_groesse = os.path.getsize(DB_PFAD) / 1024
-
-    print(f"\n{'=' * 54}")
-    print(f"  Finance-to-SQLite Import abgeschlossen")
-    print(f"{'=' * 54}")
-    print(f"  CSV       : {CSV_PFAD}")
-    print(f"  Datenbank : {DB_PFAD}  ({db_groesse:.1f} KB)")
-    print(f"  {'-' * 50}")
-    print(f"  CSV-Zeilen gesamt   : {gesamt:>6}")
-    print(f"  Neu importiert      : {neu:>6}")
-    print(f"  Duplikate ignoriert : {duplikate:>6}")
-    print(f"  {'-' * 50}")
-    print(f"{'=' * 54}\n")
+    ui = UI()
+    ui.draw_import_bericht(CSV_PFAD, DB_PFAD, gesamt, neu, start)
 
 
 
 
-def main():
+def main_import():
+
+    ui = UI()
     start = datetime.now()
-    print(f"\nStarte Import ...")
-    print(f"  Quelle    : {CSV_PFAD}")
-    print(f"  Ziel      : {DB_PFAD}")
+    ui.draw_import_start(CSV_PFAD, DB_PFAD)
 
-    # DB-Ordner anlegen falls nicht vorhanden
     DB_PFAD.parent.mkdir(parents=True, exist_ok=True)
 
     # CSV laden
     try:
         df = csv_laden(CSV_PFAD)
-        print(f"  {len(df)} Zeilen gelesen.")
+        
     except FileNotFoundError as e:
         print(f"\nFEHLER: {e}")
-        sys.exit(1)
+        return
 
     # Bereinigen & sortieren
     try:
         df = daten_bereinigen(df)
-        print(f"  Bereinigt und chronologisch sortiert.")
+        
     except KeyError as e:
         print(f"\nFEHLER (Spalten): {e}")
-        sys.exit(1)
+        return
+        
 
     # In DB schreiben
     try:
@@ -281,7 +269,7 @@ def main():
             bericht_ausgeben(gesamt, neu, start)
     except sqlite3.OperationalError as e:
         print(f"\nFEHLER (Datenbank): {e}")
-        sys.exit(1)
+        return
 
 
 
@@ -355,20 +343,23 @@ def waehle_csv_interaktiv(start_dir):
 
 
 
+CSV_PFAD = SKRIPT_DIR  # Standardwert
 
 def user_interaktion():
+    global CSV_PFAD  # ← damit die globale Variable überschrieben wird
+    
     SKRIPT_DIR  = Path(__file__).parent
     PROJEKT_DIR = SKRIPT_DIR.parent
 
-    CSV_PFAD = waehle_csv_interaktiv(PROJEKT_DIR)
+    gewaehlter_pfad = waehle_csv_interaktiv(PROJEKT_DIR)
 
     ui = UI()
-    if CSV_PFAD:
+    if gewaehlter_pfad:
+        CSV_PFAD = gewaehlter_pfad  # ← jetzt wird die globale Variable aktualisiert
         ui.draw_header(f"[green]Ausgewählt:[/green] {CSV_PFAD}")
         return CSV_PFAD
     else:
-        ui.draw_header(f"[red]Keine Datei ausgewählt.[/red]")
-
+        ui.draw_header("[red]Keine Datei ausgewählt.[/red]")
         return None
 
 
