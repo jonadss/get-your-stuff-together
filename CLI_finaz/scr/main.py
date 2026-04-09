@@ -42,7 +42,8 @@ def start_app():
                 start_ui.draw_welcom_panel(1)
                 
         
-        
+            elif user_input == "lol":
+                start_ui.crazy_frog()
    
             elif user_input == "":
                 continue
@@ -321,7 +322,7 @@ def start_importer():
     start_ui.draw_importer_panel("importer")
 
     
-    command = ["choose path","import", "help", "exit", "back"]
+    command = ["choose path","import","delete db", "help", "exit", "back"]
     command_completer = WordCompleter(command, ignore_case=True)
 
     while True:
@@ -348,7 +349,9 @@ def start_importer():
             elif user_input == "import":
                 from import_csv import main_import
                 main_import()
-
+            elif user_input == "delete db":
+                from import_csv import clear_database
+                clear_database()
 
 
 
