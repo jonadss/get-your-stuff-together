@@ -102,9 +102,9 @@ def start_balance_overview():
 
 
             elif user_input == "categories":
-                
-                start_ui.play_loading("Load categories" )
-                start_categories()
+                start_ui.play_loading("Load categories")
+                from categories import manage_categories
+                manage_categories()
                 draw_balance_overview()
 
 
