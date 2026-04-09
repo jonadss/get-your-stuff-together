@@ -9,7 +9,7 @@ from tabulate import tabulate
 
 SKRIPT_DIR = Path(__file__).parent          
 PROJEKT_DIR = SKRIPT_DIR.parent             
-DB_PFAD = PROJEKT_DIR / "db" / "transaktion.db"
+DB_PFAD = PROJEKT_DIR / "db" / "finac.db"
 
 
 # ──────────────────────────────────────────────
@@ -72,24 +72,19 @@ def test(database: sqlite3.Connection):
 # EINSTIEGSPUNKT
 # ──────────────────────────────────────────────
 
-if __name__ == "__main__":
-    if not DB_PFAD.exists():
-        print(f"\nFEHLER: Datenbank nicht gefunden: '{DB_PFAD}'")
-        print("Bitte zuerst conv_csv-sql_lite.py ausführen.\n")
-        raise SystemExit(1)
 
-    with sqlite3.connect(DB_PFAD) as conn:
-        overview(conn)
     
 
 def start_saldo_request():
     if not DB_PFAD.exists():
         print(f"\nFEHLER: Datenbank nicht gefunden: '{DB_PFAD}'")
-        raise SystemExit(1)
         return None
-    with sqlite3.connect(DB_PFAD) as conn:
-        return bank_balance(conn)
-
+    try:
+        with sqlite3.connect(DB_PFAD) as conn:
+            return bank_balance(conn)
+    except sqlite3.OperationalError as e:
+        print(f"\nFEHLER: Tabelle nicht gefunden – bitte zuerst Daten importieren. ({e})")
+        return None
 
 
 

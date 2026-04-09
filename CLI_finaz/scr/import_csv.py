@@ -20,7 +20,7 @@ SKRIPT_DIR = Path(__file__).parent
 PROJEKT_DIR = SKRIPT_DIR.parent                             
 
 CSV_PFAD = SKRIPT_DIR
-DB_PFAD  = PROJEKT_DIR / "db" / "transaktion.db"
+DB_PFAD  = PROJEKT_DIR / "db" / "finac.db"
 
 
 # ──────────────────────────────────────────────
@@ -273,13 +273,11 @@ def main_import():
 
 
 
-###########################################################
-###########################################################
+
 ###########################################################
 ##########################User Interaktion#################
 ###########################################################
-###########################################################
-###########################################################
+
 
 def waehle_csv_interaktiv(start_dir):
 
@@ -363,7 +361,26 @@ def user_interaktion():
         return None
 
 
+def clear_database():
+  
+    ui = UI()
+    try:
+        if not DB_PFAD.exists():
+            ui.draw_header("[yellow]Datenbank existiert nicht.[/yellow]")
+            return False
 
-def return_csv_pfad():
-    return CSV_PFAD
+        with sqlite3.connect(DB_PFAD) as conn:
+            cursor = conn.cursor()
+            cursor.execute("DELETE FROM transaktionen")
+            cursor.execute("DELETE FROM sqlite_sequence WHERE name='transaktionen'")
+            conn.commit()
+            ui.draw_header(f"[green]Datenbank geleert – alle Transaktionen gelöscht.[/green]")
+            return True
 
+    except sqlite3.OperationalError as e:
+        ui.draw_header(f"[red]FEHLER (Datenbank):[/red] {e}")
+        return False
+    except Exception as e:
+        ui.draw_header(f"[red]FEHLER:[/red] {e}")
+        return False
+        return False
