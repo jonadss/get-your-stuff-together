@@ -108,9 +108,10 @@ class UI:
     def draw_overview_table(self, transaktionen: list):
     
         breite = self.console.width
-        zeige_saldo = breite >= 80
-        zeige_zweck = breite >= 60
-    
+        zeige_saldo    = breite >= 80
+        zeige_zweck    = breite >= 60
+        zeige_category = breite >= 100
+
         table = Table(
             box=box.SIMPLE,
             show_header=True,
@@ -118,30 +119,40 @@ class UI:
             expand=True,
             padding=(0, 1),
         )
-    
+
         table.add_column("Datum",      width=12, justify="center")
         table.add_column("Betrag (€)", width=14, justify="right")
         if zeige_saldo:
-            table.add_column("Saldo (€)", width=14, justify="right")
+            table.add_column("Saldo (€)",  width=14, justify="right")
         if zeige_zweck:
             table.add_column("Verwendungszweck", ratio=1)
-    
+        if zeige_category:
+            table.add_column("Kategorie", width=16, justify="left")
+
         for row in transaktionen:
-            buchungs_id, datum, betrag, saldo, zweck = row
-    
+            buchungs_id, datum, betrag, saldo, zweck, category = row
+
             betrag_style = "bold green" if betrag >= 0 else "bold red"
+
             zeile = [
-                Text(str(datum), style="italic white"),
-                Text(f"{betrag:>+.2f}", style=betrag_style),
+                Text(str(datum)  if datum  else "–", style="italic white"),
+                Text(f"{betrag:>+.2f}" if betrag is not None else "–", style=betrag_style),
             ]
+
             if zeige_saldo:
-                zeile.append(Text(f"{saldo:.2f}", style="white"))
+                zeile.append(Text(f"{saldo:.2f}" if saldo is not None else "–", style="white"))
+
             if zeige_zweck:
-                max_len = max(20, breite - 60)
-                zweck_roh = str(zweck or "–")
+                max_len  = max(20, breite - 60)
+                zweck_roh  = str(zweck or "–")
                 zweck_kurz = zweck_roh[:max_len] + "…" if len(zweck_roh) > max_len else zweck_roh
                 zeile.append(Text(zweck_kurz, style="#888888"))
-    
+
+            if zeige_category:
+                cat_text  = str(category) if category else "–"
+                cat_style = "#aaaaaa" if not category else "bold #fa7ff6"
+                zeile.append(Text(cat_text, style=cat_style))
+
             table.add_row(*zeile)
     
         titel_text = Text(
@@ -154,6 +165,8 @@ class UI:
             title="[bold green]Finanz-App[/]",
             border_style="bold blue",
             box=self.box_style,
+            subtitle="[bold #808080] 'q' = back [/]",
+
         )
     
         # In String rendern (mit Farben als ANSI-Codes)
