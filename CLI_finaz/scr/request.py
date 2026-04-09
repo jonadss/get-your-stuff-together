@@ -20,13 +20,13 @@ def overview(database: sqlite3.Connection) -> None:
 
     cursor = database.cursor()
     cursor.execute("""
-        SELECT buchungs_id, buchungstag, betrag, saldo_nach_buchung, verwendungszweck
+        SELECT buchungs_id, buchungstag, betrag, saldo_nach_buchung, verwendungszweck, category
         FROM transaktionen
         ORDER BY
             SUBSTR(buchungstag, 7, 4) DESC,  
             SUBSTR(buchungstag, 4, 2) DESC,  
             SUBSTR(buchungstag, 1, 2) DESC,  
-            buchungs_id                      
+            buchungs_id
     """)
 
     return cursor.fetchall()
