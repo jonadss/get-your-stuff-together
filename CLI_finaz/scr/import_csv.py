@@ -114,6 +114,9 @@ def tabelle_erstellen(cursor: sqlite3.Cursor) -> None:
             glaeubiger_id        TEXT,
             mandatsreferenz      TEXT,
 
+
+            category             TEXT     DEFAULT NULL,
+
             UNIQUE (buchungstag, verwendungszweck, betrag)
         )
     """)
