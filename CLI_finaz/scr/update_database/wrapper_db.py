@@ -7,11 +7,17 @@ SKRIPT_DIR = Path(__file__).parent
 PROJEKT_DIR = SKRIPT_DIR.parent    
 DB_PFAD = PROJEKT_DIR / "db" / "transaktion.db"
 
+search_data_test = ["EDEKA","Penny"]   
 
-# ──────────────────────────────────────────────
-# update verwendungszweck
-# ──────────────────────────────────────────────
-def update_verwendung_to_kategorie(database):  
+
+
+
+
+
+
+
+
+def update_category_on_database(database):  
     search_data_test = ["EDEKA","Penny"]    
     cursor = database.cursor()
     cursor.execute("""
@@ -47,4 +53,4 @@ if __name__ == "__main__":
 
     with sqlite3.connect(DB_PFAD) as conn:
   
-        test(conn)
+        update_category_on_database(conn)

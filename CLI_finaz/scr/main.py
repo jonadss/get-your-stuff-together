@@ -42,7 +42,7 @@ def start_app():
                 start_ui.draw_welcom_panel(1)
                 
         
-            elif user_input == "lol":
+            elif user_input == "frogi":
                 start_ui.crazy_frog()
    
             elif user_input == "":
@@ -111,8 +111,9 @@ def start_balance_overview():
             elif user_input == "show history":
                 start_ui.play_loading("Load history...")
                 rows = overview(sqlite3.connect(DB_PFAD))
+                
                 start_ui.draw_overview_table(rows)
-                            
+                  
 
 
             elif user_input == "debts":
