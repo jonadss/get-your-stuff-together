@@ -6,10 +6,13 @@ import os
 import sys
 from pathlib import Path
 from datetime import datetime
-from tabulate import tabulate
+
 
 from ui_toolkit import *
 from ui_styles import UI
+
+import json
+
 
 
 # ──────────────────────────────────────────────
@@ -78,10 +81,7 @@ def opt(zeile, spalte: str) -> str:
 
 #maybe auslagern
 def tabelle_erstellen(cursor: sqlite3.Cursor) -> None:
-    """
-    Erstellt die Tabelle 'transaktionen' falls sie noch nicht existiert.
-    UNIQUE-Fingerabdruck: buchungstag + verwendungszweck + betrag
-    """
+
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS transaktionen (
             buchungs_id          INTEGER  PRIMARY KEY AUTOINCREMENT,
@@ -237,36 +237,45 @@ def bericht_ausgeben(gesamt: int, neu: int, start: datetime) -> None:
 
 
 def main_import():
-
     ui = UI()
     start = datetime.now()
     ui.draw_import_start(CSV_PFAD, DB_PFAD)
 
     DB_PFAD.parent.mkdir(parents=True, exist_ok=True)
 
-    # CSV laden
     try:
         df = csv_laden(CSV_PFAD)
-        
     except FileNotFoundError as e:
         print(f"\nFEHLER: {e}")
         return
 
-    # Bereinigen & sortieren
     try:
         df = daten_bereinigen(df)
-        
     except KeyError as e:
         print(f"\nFEHLER (Spalten): {e}")
         return
-        
 
-    # In DB schreiben
     try:
         with sqlite3.connect(DB_PFAD) as conn:
             tabelle_erstellen(conn.cursor())
+
+            # ID vor Import merken
+            cursor = conn.cursor()
+            cursor.execute("SELECT MAX(buchungs_id) FROM transaktionen")
+            id_vor = cursor.fetchone()[0] or 0
+
             gesamt, neu = zeilen_importieren(df, conn)
+
+
+            cursor.execute("SELECT MAX(buchungs_id) FROM transaktionen")
+            id_nach = cursor.fetchone()[0] or 0
+
+     
+            if neu > 0:
+                log_import_eintragen(id_vor + 1, id_nach, neu, CSV_PFAD)
+
             bericht_ausgeben(gesamt, neu, start)
+
     except sqlite3.OperationalError as e:
         print(f"\nFEHLER (Datenbank): {e}")
         return
@@ -275,7 +284,7 @@ def main_import():
 
 
 ###########################################################
-##########################User Interaktion#################
+###################User Interaktion########################
 ###########################################################
 
 
@@ -341,10 +350,10 @@ def waehle_csv_interaktiv(start_dir):
 
 
 
-CSV_PFAD = SKRIPT_DIR  # Standardwert
+CSV_PFAD = SKRIPT_DIR  
 
 def user_interaktion():
-    global CSV_PFAD  # ← damit die globale Variable überschrieben wird
+    global CSV_PFAD  
     
     SKRIPT_DIR  = Path(__file__).parent
     PROJEKT_DIR = SKRIPT_DIR.parent
@@ -353,7 +362,7 @@ def user_interaktion():
 
     ui = UI()
     if gewaehlter_pfad:
-        CSV_PFAD = gewaehlter_pfad  # ← jetzt wird die globale Variable aktualisiert
+        CSV_PFAD = gewaehlter_pfad  
         ui.draw_header(f"[green]Ausgewählt:[/green] {CSV_PFAD}")
         return CSV_PFAD
     else:
@@ -384,3 +393,191 @@ def clear_database():
         ui.draw_header(f"[red]FEHLER:[/red] {e}")
         return False
         return False
+
+
+
+
+LOG_PFAD = PROJEKT_DIR / "db" / "import_log.json"
+
+
+# ──────────────────────────────────────────────
+# LOG FUNKTIONEN
+# ──────────────────────────────────────────────
+
+def _log_laden() -> list:
+    """Lädt die Import-Logdatei. Gibt leere Liste zurück falls nicht vorhanden."""
+    if not LOG_PFAD.exists():
+        return []
+    try:
+        with open(LOG_PFAD, "r", encoding="utf-8") as f:
+            return json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return []
+
+
+def _log_speichern(log: list) -> None:
+    LOG_PFAD.parent.mkdir(parents=True, exist_ok=True)
+    with open(LOG_PFAD, "w", encoding="utf-8") as f:
+        json.dump(log, f, indent=2, ensure_ascii=False)
+
+
+MAX_LOG_EINTRAEGE = 10 
+
+def log_import_eintragen(id_von: int, id_bis: int, anzahl: int, csv_pfad: Path) -> None:
+
+    log = _log_laden()
+    log.append({
+        "zeitstempel":  datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "csv":          str(csv_pfad),
+        "anzahl_neu":   anzahl,
+        "id_von":       id_von,
+        "id_bis":       id_bis,
+        "rueckgaengig": False
+    })
+
+
+    if len(log) > MAX_LOG_EINTRAEGE:
+        log = log[-MAX_LOG_EINTRAEGE:]
+
+    _log_speichern(log)
+
+
+
+# ──────────────────────────────────────────────
+# UNDO LETZTER IMPORT – Logik
+# ──────────────────────────────────────────────
+
+def _undo_last_import_logik(conn: sqlite3.Connection) -> tuple[bool, str]:
+
+    log = _log_laden()
+
+    if not log:
+        return False, "Kein Import-Log gefunden – noch nie importiert."
+
+  
+    letzter_idx = None
+    for i in range(len(log) - 1, -1, -1):
+        if not log[i]["rueckgaengig"]:
+            letzter_idx = i
+            break
+
+    if letzter_idx is None:
+        return False, "Letzter Import wurde bereits erfolgreich rückgängig gemacht."
+
+    eintrag = log[letzter_idx]
+    id_von  = eintrag["id_von"]
+    id_bis  = eintrag["id_bis"]
+
+    cursor = conn.cursor()
+    cursor.execute("""
+        DELETE FROM transaktionen
+        WHERE buchungs_id BETWEEN ? AND ?
+    """, (id_von, id_bis))
+    conn.commit()
+
+    geloescht = cursor.rowcount
+
+  
+    log[letzter_idx]["rueckgaengig"] = True
+    _log_speichern(log)
+
+    return True, (
+        f"[green]Letzter Import rückgängig gemacht.[/green]\n"
+        f"CSV      : {eintrag['csv']}\n"
+        f"Datum    : {eintrag['zeitstempel']}\n"
+        f"IDs      : {id_von} – {id_bis}\n"
+        f"Gelöscht : {geloescht} Zeilen"
+    )
+
+
+
+# ──────────────────────────────────────────────
+# Starter
+# ──────────────────────────────────────────────
+
+def undo_last_import():
+    ui = UI()
+    try:
+        if not DB_PFAD.exists():
+            ui.draw_header("[yellow]Datenbank nicht gefunden.[/yellow]")
+            return
+
+        with sqlite3.connect(DB_PFAD) as conn:
+            erfolg, nachricht = _undo_last_import_logik(conn)
+            if erfolg:
+                ui.draw_header(nachricht)
+            else:
+                ui.draw_header(f"[yellow]{nachricht}[/yellow]")
+
+    except sqlite3.OperationalError as e:
+        ui.draw_header(f"[red]FEHLER (Datenbank):[/red] {e}")
+    except OSError as e:
+        ui.draw_header(f"[red]FEHLER (Log-Datei):[/red] {e}")
+    except Exception as e:
+        ui.draw_header(f"[red]Unbekannter FEHLER:[/red] {e}")
+
+
+# ──────────────────────────────────────────────
+# CSV AUS DB LÖSCHEN – Logik
+# ──────────────────────────────────────────────
+
+def _delete_csv_logik(conn: sqlite3.Connection, csv_pfad: Path) -> tuple[bool, str]:
+
+    df = csv_laden(csv_pfad)
+    df = daten_bereinigen(df)
+
+    cursor = conn.cursor()
+    geloescht = 0
+
+    for _, z in df.iterrows():
+        cursor.execute("""
+            DELETE FROM transaktionen
+            WHERE buchungstag    = ?
+              AND verwendungszweck = ?
+              AND betrag         = ?
+        """, (
+            str(z[SPALTE_BUCHUNGSTAG]).strip(),
+            opt(z, SPALTE_VERWENDUNGSZWECK),
+            z["_betrag_float"],
+        ))
+        geloescht += cursor.rowcount
+
+    conn.commit()
+    return True, (
+        f"[green]CSV-Einträge aus Datenbank entfernt.[/green]\n"
+        f"CSV      : {csv_pfad}\n"
+        f"Gelöscht : {geloescht} Zeilen"
+    )
+
+
+
+
+# ──────────────────────────────────────────────
+# Starter
+# ──────────────────────────────────────────────
+def delete_csv_from_db():
+
+    ui = UI()
+    try:
+        pfad = Path(CSV_PFAD)
+
+        if not pfad.is_file():
+            ui.draw_header(f"[yellow]Keine CSV ausgewählt oder Datei nicht gefunden:[/yellow] {pfad}")
+            return
+
+        if not DB_PFAD.exists():
+            ui.draw_header("[yellow]Datenbank nicht gefunden.[/yellow]")
+            return
+
+        with sqlite3.connect(DB_PFAD) as conn:
+            erfolg, nachricht = _delete_csv_logik(conn, pfad)
+            ui.draw_header(nachricht)
+
+    except FileNotFoundError as e:
+        ui.draw_header(f"[red]FEHLER (CSV nicht gefunden):[/red] {e}")
+    except KeyError as e:
+        ui.draw_header(f"[red]FEHLER (Spalten fehlen):[/red] {e}")
+    except sqlite3.OperationalError as e:
+        ui.draw_header(f"[red]FEHLER (Datenbank):[/red] {e}")
+    except Exception as e:
+        ui.draw_header(f"[red]Unbekannter FEHLER:[/red] {e}")

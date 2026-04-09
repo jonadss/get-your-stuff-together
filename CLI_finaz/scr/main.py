@@ -322,7 +322,7 @@ def start_importer():
     start_ui.draw_importer_panel("importer")
 
     
-    command = ["choose path","import","delete db", "help", "exit", "back"]
+    command = ["choose path", "import", "undo import", "delete csv", "delete db", "help", "exit", "back"]
     command_completer = WordCompleter(command, ignore_case=True)
 
     while True:
@@ -352,6 +352,15 @@ def start_importer():
             elif user_input == "delete db":
                 from import_csv import clear_database
                 clear_database()
+
+            
+            elif user_input == "undo import":
+                from import_csv import undo_last_import
+                undo_last_import()
+
+            elif user_input == "delete csv":
+                from import_csv import delete_csv_from_db
+                delete_csv_from_db()
 
 
 
