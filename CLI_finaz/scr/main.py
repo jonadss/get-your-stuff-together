@@ -65,7 +65,7 @@ def start_balance_overview():
     start_ui = UI()
 
     
-    command = ["show history","importer","categories","debts","budget", "help", "exit", "back"]
+    command = ["show history","importer","categories","debts","budget","evaluation", "help", "exit", "back"]
     command_completer = WordCompleter(command, ignore_case=True)
 
 
@@ -132,6 +132,13 @@ def start_balance_overview():
                 start_ui.play_loading("Load budget")
                 from budget import manage_budget
                 manage_budget()
+                draw_balance_overview()
+
+
+            elif user_input == "evaluation":
+                start_ui.play_loading("Load evaluation")
+                from evaluation import manage_evaluation
+                manage_evaluation()
                 draw_balance_overview()
 
 
