@@ -91,44 +91,94 @@ def _summe_fuer_person(cursor: sqlite3.Cursor, listen_id: int) -> float:
 # ──────────────────────────────────────────────
 
 def _draw_debts_panel(ui: UI, cursor: sqlite3.Cursor) -> None:
-    """Panel mit allen Personen und ihrer Gesamtschuld."""
-    personen = _alle_personen(cursor)
+    """
+    Vollständige Schulden-Übersicht:
+    - Gesamtsumme + aufgeteilt in Forderungen / Schulden
+    - Pro Person: alle Einträge mit Datum, Betrag, Grund
+    """
+    personen  = _alle_personen(cursor)
+    breite    = console.width
 
-    table = Table(
-        box=box.SIMPLE,
-        show_header=True,
-        header_style="bold #fa7ff6",
-        expand=True,
-        padding=(0, 1),
-    )
-    table.add_column("#",         width=4,  justify="right",  style="#808080")
-    table.add_column("Person",    width=20, style="bold white")
-    table.add_column("Summe (€)", width=14, justify="right")
-    table.add_column("Einträge",  width=10, justify="right",  style="#888888")
+    # ── Gesamtsummen berechnen ───────────────────────────────────────────────
+    gesamt       = 0.0
+    gesamt_ford  = 0.0   # positiv = mir wird geschuldet
+    gesamt_schuld = 0.0  # negativ = ich schulde
 
-    gesamt = 0.0
+    personen_daten = []  # [(person, summe, eintraege), ...]
     for listen_id, person in personen:
-        summe   = _summe_fuer_person(cursor, listen_id)
+        summe     = _summe_fuer_person(cursor, listen_id)
         eintraege = _eintraege_fuer_person(cursor, listen_id)
-        gesamt += summe
-        farbe = "bold green" if summe >= 0 else "bold red"
-        table.add_row(
-            str(listen_id),
-            person,
-            Text(f"{summe:>+.2f}", style=farbe),
-            str(len(eintraege)),
-        )
+        gesamt   += summe
+        if summe >= 0:
+            gesamt_ford   += summe
+        else:
+            gesamt_schuld += summe
+        personen_daten.append((person, summe, eintraege))
 
-    if not personen:
-        table.add_row("–", "[italic #888888]Keine Listen vorhanden[/]", "", "")
+    # ── Kopf-Gruppe ──────────────────────────────────────────────────────────
+    kopf = Table.grid(expand=True, padding=(0, 2))
+    kopf.add_column(justify="center", ratio=1)
+    kopf.add_column(justify="center", ratio=1)
+    kopf.add_column(justify="center", ratio=1)
 
-    gesamt_text = Text(
-        f"Gesamt offene Schulden:  {gesamt:>+.2f} €",
-        style="bold #fa7ff6"
+    kopf.add_row(
+        Text(f"Gesamt offene Schulden:  {gesamt:>+.2f} €",   style="bold #fa7ff6"),
+        Text(f"Forderungen:  {gesamt_ford:>+.2f} €",          style="bold green"),
+        Text(f"Schulden:  {gesamt_schuld:>+.2f} €",           style="bold red"),
     )
+
+    # ── Pro-Person-Tabellen ──────────────────────────────────────────────────
+    alle_gruppen = [Align.center(kopf), Text("")]  # Abstand nach Kopf
+
+    if not personen_daten:
+        alle_gruppen.append(
+            Align.center(Text("Keine Listen vorhanden", style="italic #888888"))
+        )
+    else:
+        for person, summe, eintraege in personen_daten:
+            farbe_summe = "bold green" if summe >= 0 else "bold red"
+
+            # Person-Header
+            person_header = Text(
+                f"  {person}  –  Summe: {summe:>+.2f} €  ({len(eintraege)} Einträge)",
+                style=f"bold white"
+            )
+
+            # Eintrags-Tabelle
+            ptable = Table(
+                box=box.SIMPLE,
+                show_header=True,
+                header_style="#808080",
+                expand=True,
+                padding=(0, 1),
+                show_edge=False,
+            )
+            ptable.add_column("ID",        width=5,  justify="right", style="#555555")
+            ptable.add_column("Datum",     width=12, justify="center", style="italic #aaaaaa")
+            ptable.add_column("Betrag (€)",width=13, justify="right")
+            ptable.add_column("Grund",     ratio=1,  style="#888888")
+
+            if eintraege:
+                for eintrag_id, betrag, grund, datum in eintraege:
+                    farbe    = "bold green" if betrag >= 0 else "bold red"
+                    max_len  = max(20, breite - 55)
+                    grund_roh  = str(grund or "–")
+                    grund_kurz = grund_roh[:max_len] + "…" if len(grund_roh) > max_len else grund_roh
+                    ptable.add_row(
+                        str(eintrag_id),
+                        str(datum),
+                        Text(f"{betrag:>+.2f}", style=farbe),
+                        grund_kurz,
+                    )
+            else:
+                ptable.add_row("–", "–", "–", "[italic #555555]Keine Einträge[/]")
+
+            alle_gruppen.append(person_header)
+            alle_gruppen.append(ptable)
+            alle_gruppen.append(Text(""))  # Leerzeile zwischen Personen
 
     console.print(Panel(
-        Group(Align.center(gesamt_text), table),
+        Group(*alle_gruppen),
         title="[bold green]Schulden-Übersicht[/]",
         border_style="bold blue",
         box=box.ROUNDED,
@@ -286,27 +336,51 @@ def _edit_person(ui: UI, listen_id: int, person: str) -> None:
                 ui.draw_header("[yellow]Keine Einträge vorhanden.[/yellow]")
                 continue
 
-            id_completer = WordCompleter(eintrag_ids, ignore_case=True)
+            # Auswahl-Liste: "ID – Datum – Betrag – Grund" für Übersicht
+            auswahl_map = {}  # Anzeige-String → eintrag_id
+            for eintrag_id, betrag, grund, datum in eintraege:
+                vorzeichen = "+" if betrag >= 0 else ""
+                grund_kurz = str(grund or "–")[:30]
+                key = f"{eintrag_id}  {datum}  {vorzeichen}{betrag:.2f}€  {grund_kurz}"
+                auswahl_map[key] = eintrag_id
+
+            console.print(
+                Panel(
+                    "\n".join(
+                        f"  [#808080]{k}[/]" for k in auswahl_map
+                    ),
+                    title="[bold #fa7ff6]Eintrag auswählen[/]",
+                    border_style="blue",
+                    box=box.ROUNDED,
+                )
+            )
+
+            id_completer = WordCompleter(list(auswahl_map.keys()), ignore_case=True)
             try:
-                raw_id = prompt(
-                    "  Eintrag-ID zum Löschen: ",
+                auswahl = prompt(
+                    "  Eintrag zum Löschen (Tab = Vorschläge): ",
                     completer=id_completer,
                 ).strip()
             except (KeyboardInterrupt, EOFError):
                 continue
 
-            if not raw_id.isdigit() or raw_id not in eintrag_ids:
-                ui.draw_header(f"[red]Ungültige ID '[bold]{raw_id}[/bold]'.[/red]")
+            # Direkte ID-Eingabe auch erlauben
+            if auswahl.isdigit() and int(auswahl) in auswahl_map.values():
+                del_id = int(auswahl)
+            elif auswahl in auswahl_map:
+                del_id = auswahl_map[auswahl]
+            else:
+                ui.draw_header(f"[red]Ungültige Auswahl.[/red]")
                 continue
 
             with _db_connect() as conn:
                 conn.execute(
                     "DELETE FROM schulden_eintraege WHERE eintrag_id = ?",
-                    (int(raw_id),)
+                    (del_id,)
                 )
                 conn.commit()
 
-            ui.draw_header(f"[green]Eintrag [bold]{raw_id}[/bold] gelöscht.[/green]")
+            ui.draw_header(f"[green]Eintrag [bold]{del_id}[/bold] gelöscht.[/green]")
 
         else:
             console.print(f"[red]Unbekanntes Kommando:[/red] {user_input}")
