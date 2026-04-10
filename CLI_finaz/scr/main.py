@@ -129,9 +129,9 @@ def start_balance_overview():
                 draw_balance_overview()
             
             elif user_input == "budget":
-
-                start_ui.play_loading("Load budget" )
-                start_budget()
+                start_ui.play_loading("Load budget")
+                from budget import manage_budget
+                manage_budget()
                 draw_balance_overview()
 
 
