@@ -117,9 +117,9 @@ def start_balance_overview():
 
 
             elif user_input == "debts":
-                
-                start_ui.play_loading("Load debts" )
-                start_debts()
+                start_ui.play_loading("Load debts")
+                from debts import manage_debts
+                manage_debts()
                 draw_balance_overview()
             
             elif user_input == "importer":
