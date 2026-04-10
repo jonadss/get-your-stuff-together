@@ -304,7 +304,7 @@ def _edit_person(ui: UI, listen_id: int, person: str) -> None:
         elif user_input == "exit":
             ui.draw_exit_panel()
 
-        # ── Eintrag hinzufügen ───────────────────────────────────────────────
+        
         elif user_input == "add":
             betrag = _eingabe_betrag(ui)
             if betrag is None:
@@ -330,13 +330,13 @@ def _edit_person(ui: UI, listen_id: int, person: str) -> None:
                 + (f"  –  {grund}" if grund else "")
             )
 
-        # ── Eintrag entfernen ────────────────────────────────────────────────
+        
         elif user_input == "remove":
             if not eintraege:
                 ui.draw_header("[yellow]Keine Einträge vorhanden.[/yellow]")
                 continue
 
-            # Auswahl-Liste: "ID – Datum – Betrag – Grund" für Übersicht
+            
             auswahl_map = {}  # Anzeige-String → eintrag_id
             for eintrag_id, betrag, grund, datum in eintraege:
                 vorzeichen = "+" if betrag >= 0 else ""
@@ -364,7 +364,7 @@ def _edit_person(ui: UI, listen_id: int, person: str) -> None:
             except (KeyboardInterrupt, EOFError):
                 continue
 
-            # Direkte ID-Eingabe auch erlauben
+            
             if auswahl.isdigit() and int(auswahl) in auswahl_map.values():
                 del_id = int(auswahl)
             elif auswahl in auswahl_map:
@@ -391,10 +391,7 @@ def _edit_person(ui: UI, listen_id: int, person: str) -> None:
 # ──────────────────────────────────────────────
 
 def _debts_edit(ui: UI) -> None:
-    """
-    Untermenü zum Anlegen, Löschen und Bearbeiten von Schuldner-Listen.
-    Kommandos: new | delete | edit | back | exit
-    """
+    
     commands = ["new", "delete", "edit", "back", "exit"]
 
     while True:
@@ -509,10 +506,7 @@ def _debts_edit(ui: UI) -> None:
 # ──────────────────────────────────────────────
 
 def _show_debts(ui: UI) -> None:
-    """
-    Untermenü zum Anzeigen von Schulden.
-    Kommandos: all | person | back | exit
-    """
+    
     commands = ["all", "person", "back", "exit"]
 
     while True:
@@ -540,13 +534,13 @@ def _show_debts(ui: UI) -> None:
         elif user_input == "exit":
             ui.draw_exit_panel()
 
-        # ── Alle anzeigen ────────────────────────────────────────────────────
+        
         elif user_input == "all":
             with _db_connect() as conn:
                 cur = conn.cursor()
                 _draw_debts_panel(ui, cur)
 
-        # ── Einzelne Person anzeigen ─────────────────────────────────────────
+        
         elif user_input == "person":
             if not personen:
                 ui.draw_header("[yellow]Keine Listen vorhanden.[/yellow]")
@@ -581,10 +575,7 @@ def _show_debts(ui: UI) -> None:
 # ──────────────────────────────────────────────
 
 def manage_debts() -> None:
-    """
-    Einstiegspunkt aus start_balance_overview().
-    Kommandos: show debts | debts edit | help | back | exit
-    """
+    
     ui = UI()
 
     # Tabellen anlegen falls noch nicht vorhanden
@@ -647,9 +638,3 @@ def manage_debts() -> None:
             console.print(f"[red]Unbekanntes Kommando:[/red] {user_input}")
 
 
-# ──────────────────────────────────────────────
-# STANDALONE
-# ──────────────────────────────────────────────
-
-if __name__ == "__main__":
-    manage_debts()

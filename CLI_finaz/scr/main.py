@@ -392,5 +392,8 @@ def start_importer():
 
 
 
+
+from startup_check import startup_check
 if __name__ == "__main__":
+    startup_check()
     start_app()
