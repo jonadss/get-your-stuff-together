@@ -1,12 +1,5 @@
-import sqlite3
-import json
-import io
-import subprocess
-from pathlib import Path
-from datetime import datetime
-from prompt_toolkit import prompt
-from prompt_toolkit.completion import WordCompleter
-from rich.console import Console as RichConsole
+
+
 from ui_toolkit import *
 from ui_styles import UI
 
@@ -27,7 +20,7 @@ BUDGET_JSON  = PROJEKT_DIR / "db" / "budget.json"
 # ──────────────────────────────────────────────
 
 def _kategorien_laden() -> dict:
-    """Lädt categories.json → { "Lebensmittel": ["EDEKA", ...], ... }"""
+
     if not CAT_JSON.exists():
         return {}
     try:
@@ -38,12 +31,7 @@ def _kategorien_laden() -> dict:
 
 
 def _budget_laden() -> dict:
-    """
-    Lädt budget.json → {
-        "Lebensmittel": { "limit": 300.0, "zeitraum": "monat" },
-        ...
-    }
-    """
+
     if not BUDGET_JSON.exists():
         return {}
     try:
@@ -64,13 +52,7 @@ def _budget_speichern(budget: dict) -> None:
 # ──────────────────────────────────────────────
 
 def _ausgaben_pro_kategorie(zeitraum: str) -> dict:
-    """
-    Summiert negative Buchungen (Ausgaben) pro Kategorie aus der DB.
-    zeitraum: "monat" → aktueller Kalendermonat
-              "jahr"  → aktuelles Kalenderjahr
-              "gesamt"→ alle Buchungen
-    Gibt { "Lebensmittel": 235.80, ... } zurück (positive Beträge = Ausgaben).
-    """
+
     if not DB_PFAD.exists():
         return {}
 
@@ -110,11 +92,7 @@ def _ausgaben_pro_kategorie(zeitraum: str) -> dict:
 # ──────────────────────────────────────────────
 
 def _draw_budget_panel(ui: UI, budget: dict, zeitraum: str) -> None:
-    """
-    Übersichts-Panel:
-    Für jede Kategorie mit Limit: Limit, verbraucht, verbleibend, Fortschrittsbalken.
-    Kategorien ohne Limit werden am Ende aufgelistet.
-    """
+
     kategorien  = _kategorien_laden()
     ausgaben    = _ausgaben_pro_kategorie(zeitraum)
     breite      = console.width
@@ -123,7 +101,7 @@ def _draw_budget_panel(ui: UI, budget: dict, zeitraum: str) -> None:
     zeitraum_label = {"monat": "aktueller Monat", "jahr": "aktuelles Jahr", "gesamt": "gesamt"}
     titel_suffix   = zeitraum_label.get(zeitraum, zeitraum)
 
-    # ── Tabelle mit Limits ───────────────────────────────────────────────────
+    
     table = Table(
         box=box.SIMPLE,
         show_header=True,
@@ -166,7 +144,7 @@ def _draw_budget_panel(ui: UI, budget: dict, zeitraum: str) -> None:
             farbe = "bold green"
             status = ""
 
-        # ASCII-Fortschrittsbalken
+        
         gefuellt  = int(prozent * balken_len)
         leer      = balken_len - gefuellt
         balken    = Text()
@@ -174,7 +152,7 @@ def _draw_budget_panel(ui: UI, budget: dict, zeitraum: str) -> None:
         balken.append("░" * leer,     style="#444444")
         balken.append(f"  {prozent*100:.0f}%{' ' + status if status else ''}", style=farbe)
 
-        # nur aktueller Zeitraum wird angezeigt wenn er mit dem Budget-Zeitraum übereinstimmt
+        
         zr_label = {"monat": "Monat", "jahr": "Jahr", "gesamt": "Gesamt"}.get(zr, zr)
 
         table.add_row(
@@ -186,7 +164,7 @@ def _draw_budget_panel(ui: UI, budget: dict, zeitraum: str) -> None:
             balken,
         )
 
-    # ── Kategorien ohne Limit ────────────────────────────────────────────────
+    
     ohne_text = ""
     if ohne_limit:
         ohne_text_obj = Text("\n  Ohne Limit:  ", style="#808080")
@@ -213,8 +191,7 @@ def _draw_budget_panel(ui: UI, budget: dict, zeitraum: str) -> None:
 # ──────────────────────────────────────────────
 
 def _eingabe_limit(ui: UI) -> float | None:
-    """Fragt nach einem Limit-Betrag. Gibt None bei Abbruch zurück."""
-    while True:
+    
         try:
             raw = prompt("  Limit (€): ").strip().replace(",", ".")
         except (KeyboardInterrupt, EOFError):
@@ -235,9 +212,13 @@ def _eingabe_limit(ui: UI) -> float | None:
                 f"bitte eine Zahl eingeben (z.B. 250 oder 300.50).[/red]"
             )
 
+######################################
+###########User Interaktion###########
+######################################
+
 
 def _eingabe_zeitraum(ui: UI) -> str | None:
-    """Fragt nach Zeitraum: monat | jahr | gesamt."""
+    
     zeitraum_completer = WordCompleter(["monat", "jahr", "gesamt"], ignore_case=True)
     while True:
         try:
@@ -261,10 +242,7 @@ def _eingabe_zeitraum(ui: UI) -> str | None:
 # ──────────────────────────────────────────────
 
 def _budget_edit(ui: UI, budget: dict) -> dict:
-    """
-    Untermenü: set | remove | back | exit
-    Gibt das (ggf. geänderte) budget-Dict zurück.
-    """
+
     kategorien = _kategorien_laden()
     if not kategorien:
         ui.draw_header("[yellow]Keine Kategorien gefunden. Bitte zuerst in 'categories' anlegen.[/yellow]")
@@ -309,7 +287,7 @@ def _budget_edit(ui: UI, budget: dict) -> dict:
                 ui.draw_header(f"[red]Kategorie '[bold]{kat}[/bold]' nicht gefunden.[/red]")
                 continue
 
-            # Aktuelles Limit anzeigen falls vorhanden
+            
             if kat in budget:
                 alt = budget[kat]
                 ui.draw_header(
@@ -332,7 +310,7 @@ def _budget_edit(ui: UI, budget: dict) -> dict:
                 f"{limit:.2f} € / {zeitraum}"
             )
 
-        # ── Limit entfernen ──────────────────────────────────────────────────
+        
         elif user_input == "remove":
             mit_limit = [k for k in kat_namen if k in budget]
             if not mit_limit:
@@ -365,10 +343,7 @@ def _budget_edit(ui: UI, budget: dict) -> dict:
 # ──────────────────────────────────────────────
 
 def manage_budget() -> None:
-    """
-    Einstiegspunkt aus start_balance_overview().
-    Kommandos: show | edit | zeitraum | help | back | exit
-    """
+ 
     ui       = UI()
     budget   = _budget_laden()
     zeitraum = "monat"   # Standard-Ansicht
@@ -410,7 +385,7 @@ def manage_budget() -> None:
         elif user_input == "show":
             budget = _budget_laden()   # frisch laden
 
-        # ── Zeitraum wechseln ────────────────────────────────────────────────
+        
         elif user_input == "zeitraum":
             zr = _eingabe_zeitraum(ui)
             if zr:
@@ -425,9 +400,3 @@ def manage_budget() -> None:
             console.print(f"[red]Unbekanntes Kommando:[/red] {user_input}")
 
 
-# ──────────────────────────────────────────────
-# STANDALONE
-# ──────────────────────────────────────────────
-
-if __name__ == "__main__":
-    manage_budget()

@@ -1,13 +1,5 @@
-import sqlite3
-import json
-import io
-import subprocess
-from pathlib import Path
-from datetime import datetime, date
-from collections import defaultdict
-from prompt_toolkit import prompt
-from prompt_toolkit.completion import WordCompleter
-from rich.console import Console as RichConsole
+
+
 from ui_toolkit import *
 from ui_styles import UI
 
@@ -49,13 +41,7 @@ def _budget_laden() -> dict:
 
 
 def _eval_config_laden() -> dict:
-    """
-    Lädt evaluation.json:
-    {
-      "einkommen_kategorien": ["Gehalt", "Freelance"],
-      "fixkosten_kategorien": ["Miete", "Strom", "Internet"]
-    }
-    """
+
     if not EVAL_JSON.exists():
         return {"einkommen_kategorien": [], "fixkosten_kategorien": []}
     try:
@@ -85,7 +71,7 @@ def _db_connect() -> sqlite3.Connection:
 
 
 def _alle_kategorien_in_db() -> list[str]:
-    """Gibt alle einzigartigen Kategorien aus der DB zurück."""
+
     try:
         with _db_connect() as conn:
             cur = conn.cursor()
@@ -141,7 +127,7 @@ def _ausgaben_nach_monat_kategorie(kategorie: str | None = None) -> dict:
 
 
 def _letzte_n_monate_keys(n: int) -> list[str]:
-    """Gibt die letzten n Monate als 'YYYY-MM'-Keys zurück (inkl. aktuellen)."""
+
     now   = datetime.now()
     monate = []
     for i in range(n - 1, -1, -1):
@@ -174,10 +160,7 @@ def _less(panel) -> None:
 # ──────────────────────────────────────────────
 
 def _auswertung_vergleich(ui: UI) -> None:
-    """
-    Ausgaben einer Kategorie im aktuellen Monat vs.
-    Durchschnitt der letzten N Monate.
-    """
+
     alle_kat  = ["all"] + _alle_kategorien_in_db()
     if not alle_kat:
         ui.draw_header("[yellow]Keine kategorisierten Buchungen gefunden.[/yellow]")
@@ -269,7 +252,7 @@ def _auswertung_vergleich(ui: UI) -> None:
 # ──────────────────────────────────────────────
 
 def _auswertung_saison(ui: UI) -> None:
-    """Entwicklung einer Kategorie über das letzte Jahr mit Spitzen-Markierung."""
+
     alle_kat = _alle_kategorien_in_db()
     if not alle_kat:
         ui.draw_header("[yellow]Keine kategorisierten Buchungen gefunden.[/yellow]")
@@ -324,14 +307,11 @@ def _auswertung_saison(ui: UI) -> None:
 
 
 # ──────────────────────────────────────────────
-# AUSWERTUNG 3 – ABO-FALLE
+# AUSWERTUNG 3 – ABO-FALLE DADADADAHHHHH
 # ──────────────────────────────────────────────
 
 def _auswertung_abo(ui: UI) -> None:
-    """
-    Listet alle regelmäßigen Abbuchungen unter einem konfigurierbaren
-    Betragslimit auf und klassifiziert sie als monatlich oder jährlich.
-    """
+
     try:
         limit_raw = prompt("  Maximalbetrag pro Buchung (€, Enter = 15): ").strip()
     except (KeyboardInterrupt, EOFError):
@@ -434,10 +414,7 @@ def _auswertung_abo(ui: UI) -> None:
 # ──────────────────────────────────────────────
 
 def _auswertung_wiederkehrend(ui: UI) -> None:
-    """
-    Sucht nach Buchungen die mehr als einmal mit gleichem Betrag vorkommen
-    und listet sie nach Häufigkeit auf.
-    """
+
     try:
         with _db_connect() as conn:
             cur = conn.cursor()
@@ -495,10 +472,7 @@ def _auswertung_wiederkehrend(ui: UI) -> None:
 # ──────────────────────────────────────────────
 
 def _auswertung_einkommen(ui: UI, config: dict) -> None:
-    """
-    Vergleicht Fixkosten- und Einkommen-Kategorien.
-    Zeigt prozentualen Anteil + 50%-Warnung.
-    """
+
     eink_kats  = config.get("einkommen_kategorien", [])
     fix_kats   = config.get("fixkosten_kategorien", [])
 
@@ -544,7 +518,7 @@ def _auswertung_einkommen(ui: UI, config: dict) -> None:
     anteil      = (gesamt_fix / gesamt_eink * 100) if gesamt_eink > 0 else 0.0
     warnung     = anteil > 50
 
-    # ── Einnahmen-Tabelle ─────────────────────────────────────────────────────
+    # ── Einnahmen-Tabelle 
     t_eink = Table(box=box.SIMPLE, show_header=True,
                    header_style="bold #fa7ff6", expand=True, padding=(0,1))
     t_eink.add_column("Kategorie",  width=20, style="bold white")
@@ -555,7 +529,7 @@ def _auswertung_einkommen(ui: UI, config: dict) -> None:
     t_eink.add_row(Text("GESAMT", style="bold #fa7ff6"),
                    Text(f"{gesamt_eink:.2f}", style="bold #fa7ff6"))
 
-    # ── Fixkosten-Tabelle ────────────────────────────────────────────────────
+    #  Fixkosten-Tabelle 
     t_fix = Table(box=box.SIMPLE, show_header=True,
                   header_style="bold #fa7ff6", expand=True, padding=(0,1))
     t_fix.add_column("Kategorie",  width=20, style="bold white")
@@ -566,7 +540,7 @@ def _auswertung_einkommen(ui: UI, config: dict) -> None:
     t_fix.add_row(Text("GESAMT", style="bold #fa7ff6"),
                   Text(f"{gesamt_fix:.2f}", style="bold #fa7ff6"))
 
-    # ── Ergebnis-Zeile ───────────────────────────────────────────────────────
+    #  Ergebnis-Zeile 
     anteil_farbe = "bold red" if warnung else "bold green"
     ergebnis_text = Text()
     ergebnis_text.append(f"Fixkosten-Anteil am Einkommen: ", style="bold white")
@@ -597,10 +571,7 @@ def _auswertung_einkommen(ui: UI, config: dict) -> None:
 # ──────────────────────────────────────────────
 
 def _auswertung_budget_warnung(ui: UI) -> None:
-    """
-    Hochrechnung: Basierend auf bisherigen Ausgaben dieses Monats,
-    wird das Budget einer Kategorie voraussichtlich überschritten?
-    """
+
     budget    = _budget_laden()
     alle_kat  = _alle_kategorien_in_db()
 
@@ -835,7 +806,7 @@ def _draw_eval_menu(ui: UI) -> None:
 # ──────────────────────────────────────────────
 
 def manage_evaluation() -> None:
-    """Einstiegspunkt aus start_balance_overview()."""
+    
     ui     = UI()
     config = _eval_config_laden()
 
@@ -932,10 +903,3 @@ def _settings_menü(ui: UI, config: dict) -> None:
         else:
             console.print(f"[red]Unbekanntes Kommando:[/red] {raw}")
 
-
-# ──────────────────────────────────────────────
-# STANDALONE
-# ──────────────────────────────────────────────
-
-if __name__ == "__main__":
-    manage_evaluation()

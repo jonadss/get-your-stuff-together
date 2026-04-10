@@ -1,8 +1,4 @@
-import sqlite3
-import json
-from pathlib import Path
-from prompt_toolkit import prompt
-from prompt_toolkit.completion import WordCompleter
+
 from ui_toolkit import *
 from ui_styles import UI
 
@@ -22,10 +18,7 @@ CAT_JSON     = PROJEKT_DIR / "db" / "categories.json"
 # ──────────────────────────────────────────────
 
 def _kategorien_laden() -> dict:
-    """
-    Gibt ein Dict zurück:
-    { "Lebensmittel": ["EDEKA", "Penny", "Rewe"], ... }
-    """
+
     if not CAT_JSON.exists():
         return {}
     try:
@@ -46,11 +39,7 @@ def _kategorien_speichern(kategorien: dict) -> None:
 # ──────────────────────────────────────────────
 
 def update_category_on_database(database: sqlite3.Connection) -> int:
-    """
-    Liest alle Transaktionen, vergleicht verwendungszweck mit den Wortpools
-    aus der JSON und schreibt den Kategorienamen in die Spalte category.
-    Gibt die Anzahl aktualisierter Zeilen zurück.
-    """
+
     kategorien = _kategorien_laden()
     if not kategorien:
         return 0
@@ -109,7 +98,7 @@ def start_category_update():
 # ──────────────────────────────────────────────
 
 def _draw_kategorien_panel(ui: UI, kategorien: dict) -> None:
-    """Gibt eine Übersicht aller Kategorien mit Wortpool aus."""
+    
     if not kategorien:
         ui.draw_header("[yellow]Noch keine Kategorien vorhanden.[/yellow]")
         return
@@ -134,12 +123,12 @@ def _draw_kategorien_panel(ui: UI, kategorien: dict) -> None:
         box=box.ROUNDED,
     ))
 
+######################################
+###########User Interaktion###########
+######################################
 
 def manage_categories():
-    """
-    Interaktives Menü zum Erstellen und Löschen von Kategorien.
-    Kommandos: new | delete | exit | back
-    """
+
     ui = UI()
     kategorien = _kategorien_laden()
 
@@ -175,7 +164,7 @@ def manage_categories():
                 "[bold #fa7ff6]back[/]     – Zurück"
             )
 
-        # ── Neue Kategorie ───────────────────────────────────────────────────
+        # neu kategorie
         elif user_input == "new":
             try:
                 name = prompt("  Kategoriename: ").strip()
@@ -193,7 +182,7 @@ def manage_categories():
             _kategorien_speichern(kategorien)
             ui.draw_header(f"[green]Kategorie '[bold]{name}[/bold]' erstellt.[/green]")
 
-        # ── Kategorie löschen ────────────────────────────────────────────────
+        
         elif user_input == "delete":
             if not kategorien:
                 ui.draw_header("[yellow]Keine Kategorien vorhanden.[/yellow]")
@@ -216,11 +205,11 @@ def manage_categories():
             _kategorien_speichern(kategorien)
             ui.draw_header(f"[green]Kategorie '[bold]{name}[/bold]' gelöscht.[/green]")
 
-        # ── Wortpool bearbeiten ──────────────────────────────────────────────
+       
         elif user_input == "wordpool":
             _manage_wordpool(ui, kategorien)
 
-        # ── Auf Datenbank anwenden ───────────────────────────────────────────
+        
         elif user_input == "apply":
             start_category_update()
 
@@ -228,40 +217,9 @@ def manage_categories():
             console.print(f"[red]Unbekanntes Kommando:[/red] {user_input}")
 
 
-# ──────────────────────────────────────────────
-# WORTPOOL BEARBEITEN
-# ──────────────────────────────────────────────
-
-def _draw_wordpool_panel(ui: UI, name: str, woerter: list) -> None:
-    table = Table(
-        box=box.SIMPLE,
-        show_header=True,
-        header_style="bold #fa7ff6",
-        expand=True,
-        padding=(0, 1),
-    )
-    table.add_column("#",     width=4,  justify="right", style="#808080")
-    table.add_column("Wort", ratio=1,  style="bold white")
-
-    for i, wort in enumerate(woerter, 1):
-        table.add_row(str(i), wort)
-
-    if not woerter:
-        table.add_row("–", "[italic #888888]Noch keine Wörter[/]")
-
-    console.print(Panel(
-        table,
-        title=f"[bold green]Wortpool – {name}[/]",
-        border_style="bold blue",
-        box=box.ROUNDED,
-    ))
-
 
 def _manage_wordpool(ui: UI, kategorien: dict) -> None:
-    """
-    Wörter einer Kategorie hinzufügen oder entfernen.
-    Kommandos: add | remove | back
-    """
+ 
     if not kategorien:
         ui.draw_header("[yellow]Keine Kategorien vorhanden. Bitte zuerst eine erstellen.[/yellow]")
         return
@@ -304,7 +262,7 @@ def _manage_wordpool(ui: UI, kategorien: dict) -> None:
         elif user_input == "exit":
             ui.draw_exit_panel()
 
-        # ── Wort hinzufügen ──────────────────────────────────────────────────
+        
         elif user_input == "add":
             try:
                 wort = prompt("  Neues Wort: ").strip()
@@ -322,7 +280,7 @@ def _manage_wordpool(ui: UI, kategorien: dict) -> None:
             _kategorien_speichern(kategorien)
             ui.draw_header(f"[green]'[bold]{wort}[/bold]' hinzugefügt.[/green]")
 
-        # ── Wort entfernen ───────────────────────────────────────────────────
+        
         elif user_input == "remove":
             if not woerter:
                 ui.draw_header("[yellow]Wortpool ist leer.[/yellow]")
@@ -347,5 +305,40 @@ def _manage_wordpool(ui: UI, kategorien: dict) -> None:
 
         else:
             console.print(f"[red]Unbekanntes Kommando:[/red] {user_input}")
+
+
+
+
+
+
+
+# ──────────────────────────────────────────────
+# WORTPOOL UI
+# ──────────────────────────────────────────────
+
+def _draw_wordpool_panel(ui: UI, name: str, woerter: list) -> None:
+    table = Table(
+        box=box.SIMPLE,
+        show_header=True,
+        header_style="bold #fa7ff6",
+        expand=True,
+        padding=(0, 1),
+    )
+    table.add_column("#",     width=4,  justify="right", style="#808080")
+    table.add_column("Wort", ratio=1,  style="bold white")
+
+    for i, wort in enumerate(woerter, 1):
+        table.add_row(str(i), wort)
+
+    if not woerter:
+        table.add_row("–", "[italic #888888]Noch keine Wörter[/]")
+
+    console.print(Panel(
+        table,
+        title=f"[bold green]Wortpool – {name}[/]",
+        border_style="bold blue",
+        box=box.ROUNDED,
+    ))
+
 
 
