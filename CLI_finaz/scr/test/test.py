@@ -1,54 +1,74 @@
-# Hiding the inputted password with maskpass()
-# and encrypting it with use of base64()
-import maskpass  # to hide the password
-import base64  # to encode and decode the password
+import maskpass
+from passlib.hash import bcrypt
 
-# dictionary with username
-# as key & password as value
-dict = {'Rahul': b'cmFodWw=',
-        'Sandeep': b'U2FuZGVlcA=='}
+from argon2 import PasswordHasher
 
-# function to create password
+
+def hash_password(password):
+    # Configure the algorithm
+    time_cost = 2          # Number of iterations
+    memory_cost = 102400   # 100 MB in KiB
+    parallelism = 8        # Number of parallel threads
+    hash_len = 32          # Length of the hash in bytes
+    salt_len = 16          # Length of the salt in bytes
+    
+    # Create the hasher
+    ph = argon2.PasswordHasher(
+        time_cost=time_cost,
+        memory_cost=memory_cost,
+        parallelism=parallelism,
+        hash_len=hash_len,
+        salt_len=salt_len,
+        type=argon2.Type.ID  # Using Argon2id variant
+    )
+    
+    # Hash the password (salt is generated automatically)
+    hash = ph.hash(password)
+    
+    return hash
+
+
+
+
+
+ph = PasswordHasher()
+
+user_db = {}
 def createpwd():
-    print("\n========Create Account=========")
-    name = input("Username : ")
     
-    # masking password with prompt msg 'Password :'
+
+
+    print("\n======== Create Account =========")
+    name = input("Username : ")
     pwd = maskpass.askpass("Password : ")
     
-    # encoding the entered password
-    encpwd = base64.b64encode(pwd.encode("utf-8"))
 
-    # appending username and password in dict
-    dict[name] = encpwd  
-    # print(dict)
+    hashed_password = hash_password(pwd)
 
-# function for sign-in
+    print("Hashed password:", hashed_password)
+
+
+    user_db[name] = hashed_password
+    print(f"Account für {name} wurde erstellt.")
+
 def sign_in():
-    print("\n\n=========Login Page===========")
+    print("\n========= Login Page ===========")
     name = input("Username : ")
     
-    # masking password with prompt msg 'Password :'
+    if name not in user_db:
+        print("User nicht vorhanden")
+        return
+
     pwd = maskpass.askpass("Password : ")
-    
-    # encoding the entered password
-    encpwd = base64.b64encode(pwd.encode("utf-8"))
+    stored_hash = user_db[name]
 
-    # fetching password with
-    # username as key in dict
-    password = dict[name]  
-    if(encpwd == password):
-        print("Successfully logged in.")
-    else:
-        print("Login Failed")
+    try:
+        ph.verify(stored_hash, pwd)
+        print("Password is valid!")
+    except Exception:
+        print("Invalid password!")
 
 
-
+# Programmablauf
 createpwd()
-
-
-try:
-    sign_in()
-
-except KeyError:
-    print("User nicht vorhanden")
+sign_in()
