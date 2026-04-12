@@ -290,6 +290,7 @@ def _budget_edit(ui: UI, budget: dict) -> dict:
             
             if kat in budget:
                 alt = budget[kat]
+
                 ui.draw_header(
                     f"[#808080]Aktuell:[/]  Limit [bold]{alt['limit']:.2f} €[/bold]  "
                     f"/ Zeitraum [bold]{alt['zeitraum']}[/bold]  –  neuen Wert eingeben:"
