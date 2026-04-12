@@ -199,12 +199,12 @@ def _eingabe_limit(ui: UI) -> float | None:
 
         if raw == "":
             ui.draw_header("[yellow]Kein Betrag eingegeben.[/yellow]")
-            continue
+            
         try:
             wert = float(raw)
             if wert <= 0:
                 ui.draw_header("[red]Bitte einen Betrag größer als 0 eingeben.[/red]")
-                continue
+                
             return wert
         except ValueError:
             ui.draw_header(
@@ -290,6 +290,7 @@ def _budget_edit(ui: UI, budget: dict) -> dict:
             
             if kat in budget:
                 alt = budget[kat]
+
                 ui.draw_header(
                     f"[#808080]Aktuell:[/]  Limit [bold]{alt['limit']:.2f} €[/bold]  "
                     f"/ Zeitraum [bold]{alt['zeitraum']}[/bold]  –  neuen Wert eingeben:"
