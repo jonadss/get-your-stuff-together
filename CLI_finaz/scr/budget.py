@@ -199,12 +199,12 @@ def _eingabe_limit(ui: UI) -> float | None:
 
         if raw == "":
             ui.draw_header("[yellow]Kein Betrag eingegeben.[/yellow]")
-            continue
+            #continue
         try:
             wert = float(raw)
             if wert <= 0:
                 ui.draw_header("[red]Bitte einen Betrag größer als 0 eingeben.[/red]")
-                continue
+                #continue
             return wert
         except ValueError:
             ui.draw_header(

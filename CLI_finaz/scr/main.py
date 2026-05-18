@@ -8,58 +8,6 @@ from request import overview, start_saldo_request, DB_PFAD
 import sqlite3
 
 
-
-def start_app():
-    start_ui = UI()
-    start_ui.draw_welcom_panel(2)
-
-    
-
-
-
-
-    command = ["start", "help", "exit"]
-    command_completer = WordCompleter(command, ignore_case=True)
-
-    while True:
-        try:
-            user_input = prompt(
-                "euer volk hungert mein lord  ", 
-                completer=command_completer
-            ).strip().lower()
-
-            if user_input == "exit":
-                start_ui.draw_exit_panel()
-            
-            
-            elif user_input == "help":
-                print("no help for you")
-
-            elif user_input == "start":
-
-                start_ui.play_loading("Load bank balance ...")
-                start_balance_overview()
-                start_ui.draw_welcom_panel(1)
-                
-        
-            elif user_input == "frogi":
-                start_ui.crazy_frog()
-   
-            elif user_input == "":
-                continue
-            else: 
-                console.print(f"[red]Unknown command:[/red] {user_input}")
-
-        # Fängt Strg+C ab
-        except KeyboardInterrupt: 
-            start_ui.draw_exit_panel()
-
-        # Fängt Strg+D ab
-        except EOFError: 
-            start_ui.draw_exit_panel()
-            
-
-
 def start_balance_overview():
     
     start_ui = UI()
@@ -110,9 +58,12 @@ def start_balance_overview():
 
             elif user_input == "show history":
                 start_ui.play_loading("Load history...")
-                rows = overview(sqlite3.connect(DB_PFAD))
-                
-                start_ui.draw_overview_table(rows)
+                try:
+                    rows = overview(sqlite3.connect(DB_PFAD))
+                except sqlite3.OperationalError:
+                    print("FEHLER: Tabelle nicht gefunden – bitte zuerst Daten importieren. ")
+                else:
+                    start_ui.draw_overview_table(rows)
                   
 
 
@@ -396,4 +347,8 @@ def start_importer():
 from startup_check import startup_check
 if __name__ == "__main__":
     startup_check()
-    start_app()
+    
+    start_ui = UI()
+    start_ui.draw_welcom_panel(4)
+    
+    start_balance_overview()
