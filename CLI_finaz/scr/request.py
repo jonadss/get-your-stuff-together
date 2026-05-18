@@ -18,8 +18,9 @@ DB_PFAD = PROJEKT_DIR / "db" / "finac.db"
 
 def overview(database: sqlite3.Connection) -> None:
 
-    cursor = database.cursor()
-    cursor.execute("""
+    try:
+        cursor = database.cursor()
+        cursor.execute("""
         SELECT buchungs_id, buchungstag, betrag, saldo_nach_buchung, verwendungszweck, category
         FROM transaktionen
         ORDER BY
@@ -28,6 +29,9 @@ def overview(database: sqlite3.Connection) -> None:
             SUBSTR(buchungstag, 1, 2) DESC,  
             buchungs_id
     """)
+    except:
+        raise sqlite3.OperationalError   
+    
 
     return cursor.fetchall()
 

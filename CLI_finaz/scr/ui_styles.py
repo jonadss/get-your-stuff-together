@@ -301,7 +301,7 @@ class UI:
 
 
     #build grid for welcome panel 
-    def _build_grid_panel(self, wink=False, middle_title = "Welcome!!"):
+    def _build_grid_panel(self, wink=False, middle_title = "Welcome", username= ""):
 
         current_date, current_time, app_status, app_title = self.get_context()
         
@@ -312,17 +312,35 @@ class UI:
         grid.add_column(ratio=3)
         grid.add_column(ratio=1)
         text_middle_text = Text(middle_title,style= "#fa7ff6")
-       
+        text_username = Text(username,style= "bold blue")
+
+        # Logo-Banner
+        banner = Text()
+        banner.append("\n")
+        banner.append("  ██████╗ ██╗███╗   ██╗ █████╗  ██████╗\n", "bold #00d7ff")
+        banner.append("  ██╔═══╝ ██║████╗  ██║██╔══██╗██╔════╝\n", "bold #00d7ff")
+        banner.append("  █████╗  ██║██╔██╗ ██║███████║██║     \n", "bold #fa7ff6")
+        banner.append("  ██╔══╝  ██║██║╚██╗██║██╔══██║██║     \n", "bold #fa7ff6")
+        banner.append("  ██║     ██║██║ ╚████║██║  ██║╚██████╗\n", "bold #ff79c6")
+        banner.append("  ╚═╝     ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝ ╚═════╝\n", "bold #ff79c6")
+        banner.append("        Dein persönlicher Finanz-Begleiter\n", "#808080")
+ 
+
+
 
         grid.add_row(
-            frog_img,
-            Align.center(text_middle_text, vertical="middle"),
+            Align.center(
+                frog_img,vertical="middle"
+            ),
+            Align.center(
+                Group(banner), vertical="middle"),
             Align.right(
                 Group(app_status, "", current_date, current_time), 
                 vertical="top"
             )
         )
         return Panel(grid, title=app_title, border_style="magenta" ,box=box.ROUNDED )
+
 
 
 
