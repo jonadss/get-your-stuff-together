@@ -351,8 +351,10 @@ def manage_budget() -> None:
 
     commands = ["show", "edit", "zeitraum", "help", "back", "exit"]
 
+    _draw_budget_panel(ui, budget, zeitraum)
+
     while True:
-        _draw_budget_panel(ui, budget, zeitraum)
+        
         completer = WordCompleter(commands, ignore_case=True)
 
         try:
@@ -361,7 +363,8 @@ def manage_budget() -> None:
                 completer=completer,
             ).strip().lower()
         except (KeyboardInterrupt, EOFError):
-            ui.draw_exit_panel()
+            #ui.draw_exit_panel()
+            return
 
         if user_input == "":
             continue
@@ -373,15 +376,14 @@ def manage_budget() -> None:
             ui.draw_exit_panel()
 
         elif user_input == "help":
-            ui.draw_header(
-                "[bold #fa7ff6]show[/]       – Budget-Übersicht aktualisieren\n"
-                "[bold #fa7ff6]edit[/]       – Limits bearbeiten\n"
-                "  [#888888]set[/]        – Limit für eine Kategorie setzen oder ändern\n"
-                "  [#888888]remove[/]     – Limit einer Kategorie entfernen\n\n"
-                "[bold #fa7ff6]zeitraum[/]   – Anzeigefilter wechseln (monat / jahr / gesamt)\n\n"
-                "[bold #fa7ff6]back[/]       – Zurück zur Balance-Übersicht\n"
-                "[bold #fa7ff6]exit[/]       – App beenden"
-            )
+            console.print("\n[bold cyan]Available commands:[/bold cyan]")
+            console.print("  [green]show[/green]       – refresh the budget overview")
+            console.print("  [green]edit[/green]       – edit budget limits")
+            console.print("    [green]set[/green]      – set or update the limit for a category")
+            console.print("    [green]remove[/green]   – remove the limit for a category")
+            console.print("  [green]zeitraum[/green]   – change display period (monat / jahr / gesamt)")
+            console.print("  [green]back[/green]       – go back")
+            console.print("  [green]exit[/green]       – quit the program\n")
 
         elif user_input == "show":
             budget = _budget_laden()   # frisch laden

@@ -591,11 +591,13 @@ def manage_debts() -> None:
         return
 
     commands = ["show debts", "debts edit", "help", "back", "exit"]
+    
+    
+    with _db_connect() as conn:
+        cur = conn.cursor()
+        _draw_debts_panel(ui, cur)
 
     while True:
-        with _db_connect() as conn:
-            cur = conn.cursor()
-            _draw_debts_panel(ui, cur)
 
         completer = WordCompleter(commands, ignore_case=True)
 
@@ -618,19 +620,18 @@ def manage_debts() -> None:
             ui.draw_exit_panel()
 
         elif user_input == "help":
-            ui.draw_header(
-                "[bold #fa7ff6]show debts[/]   – Schulden anzeigen\n"
-                "  [#888888]all[/]            – Übersicht aller Personen mit Gesamtsumme\n"
-                "  [#888888]person[/]         – Detailansicht einer einzelnen Person\n\n"
-                "[bold #fa7ff6]debts edit[/]   – Listen und Einträge verwalten\n"
-                "  [#888888]new[/]            – Neue Schuldner-Liste anlegen\n"
-                "  [#888888]delete[/]         – Schuldner-Liste löschen (inkl. alle Einträge)\n"
-                "  [#888888]edit[/]           – Person auswählen und Einträge bearbeiten\n"
-                "    [#888888]add[/]          – Neuen Schulden-Eintrag hinzufügen\n"
-                "    [#888888]remove[/]       – Eintrag per ID löschen\n\n"
-                "[bold #fa7ff6]back[/]         – Zurück zur Balance-Übersicht\n"
-                "[bold #fa7ff6]exit[/]         – App beenden"
-            )
+            console.print("\n[bold cyan]Available commands:[/bold cyan]")
+            console.print("  [green]show debts[/green]    – show the debts overview")
+            console.print("    [green]all[/green]         – summary of all people with totals")
+            console.print("    [green]person[/green]      – detailed view for one person")
+            console.print("  [green]debts edit[/green]    – manage lists and entries")
+            console.print("    [green]new[/green]         – create a new debt list for a person")
+            console.print("    [green]delete[/green]      – delete a person's list and all entries")
+            console.print("    [green]edit[/green]        – select a person to edit their entries")
+            console.print("      [green]add[/green]       – add a new debt entry")
+            console.print("      [green]remove[/green]    – delete an entry by ID")
+            console.print("  [green]back[/green]          – go back")
+            console.print("  [green]exit[/green]          – quit the program\n")
 
         elif user_input == "show debts":
             _show_debts(ui)

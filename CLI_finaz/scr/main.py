@@ -40,7 +40,15 @@ def start_balance_overview():
                 
 
             elif user_input == "help":
-                print("no help for you")
+                console.print("\n[bold cyan]Available commands:[/bold cyan]")
+                console.print("  [green]show history[/green]  – show all imported transactions")
+                console.print("  [green]importer[/green]      – import CSV files into the database")
+                console.print("  [green]categories[/green]    – manage transaction categories")
+                console.print("  [green]debts[/green]         – manage debts and credits")
+                console.print("  [green]budget[/green]        – manage monthly budgets")
+                console.print("  [green]evaluation[/green]    – show spending evaluations and charts")
+                console.print("  [green]back[/green]          – go back")
+                console.print("  [green]exit[/green]          – quit the program\n")
 
 
 
@@ -125,7 +133,14 @@ def start_importer():
                 return
 
             elif user_input == "help":
-                print("no help for you")
+                console.print("\n[bold cyan]Available commands:[/bold cyan]")
+                console.print("  [green]choose path[/green]  – set the path to a CSV file")
+                console.print("  [green]import[/green]       – import the selected CSV into the database")
+                console.print("  [green]undo import[/green]  – revert the last import")
+                console.print("  [green]delete csv[/green]   – remove the selected CSV file from the database")
+                console.print("  [green]delete db[/green]    – clear the entire database")
+                console.print("  [green]back[/green]         – go back")
+                console.print("  [green]exit[/green]         – quit the program\n")
 
             elif user_input == "choose path":
                 from import_csv import user_interaktion
