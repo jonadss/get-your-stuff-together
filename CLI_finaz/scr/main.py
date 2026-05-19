@@ -11,19 +11,16 @@ import sqlite3
 def start_balance_overview():
     
     start_ui = UI()
-
-    
-    command = ["show history","importer","categories","debts","budget","evaluation", "help", "exit", "back"]
-    command_completer = WordCompleter(command, ignore_case=True)
-
-
-
-
+    #help func
     def draw_balance_overview():
         start_ui = UI()
         
         new_saldo = start_saldo_request()
         start_ui.draw_balance_overview_panel(saldo=new_saldo)
+    
+    command = ["show history","importer","categories","debts","budget","evaluation", "help", "exit", "back"]
+    command_completer = WordCompleter(command, ignore_case=True)
+
 
 
     draw_balance_overview()
@@ -101,177 +98,8 @@ def start_balance_overview():
                 console.print(f"[red]Unknown command:[/red] {user_input}")
 
         # Fängt Strg+C ab
-        except KeyboardInterrupt: 
+        except KeyboardInterrupt,EOFError: 
             start_ui.draw_exit_panel()
-            
-        # Fängt Strg+D ab
-        except EOFError: 
-            start_ui.draw_exit_panel()
-            
-
-
-
-def start_budget():
-    
-    start_ui = UI()
-    start_ui.draw_menu_panel("budget")
-    
-    command = ["start", "help", "exit", "back"]
-    command_completer = WordCompleter(command, ignore_case=True)
-
-    while True:
-        try:
-            user_input = prompt(
-                "categories -- enter command: ", 
-                completer=command_completer
-            ).strip().lower()
-
-            if user_input == "exit":
-                start_ui.draw_exit_panel()
-            elif user_input == "back":
-                return
-
-            elif user_input == "help":
-                print("no help for you")
-
-            elif user_input == "start":
-                start_ui.draw_header("you will be forwarded")
-                
-    
-
-
-
-
-
-
-
-
-
-            elif user_input == "":
-                continue
-            else: 
-                console.print(f"[red]Unknown command:[/red] {user_input}")
-
-        # Fängt Strg+C ab
-        except KeyboardInterrupt: 
-            start_ui.draw_exit_panel()
-        # Fängt Strg+D ab
-        except EOFError: 
-            start_ui.draw_exit_panel()
-
-
-
-
-def start_categories():
-    
-    start_ui = UI()
-    start_ui.draw_menu_panel("budget")
-
-    
-    command = ["start", "help", "exit", "back"]
-    command_completer = WordCompleter(command, ignore_case=True)
-
-    while True:
-        try:
-            user_input = prompt(
-                "categories -- enter command: ", 
-                completer=command_completer
-            ).strip().lower()
-
-            if user_input == "exit":
-                start_ui.draw_exit_panel()
-            elif user_input == "back":
-                return
-
-            elif user_input == "help":
-                print("no help for you")
-
-            elif user_input == "start":
-                start_ui.draw_header("you will be forwarded")
-                
-    
-
-
-
-
-
-
-
-
-
-            elif user_input == "":
-                continue
-            else: 
-                console.print(f"[red]Unknown command:[/red] {user_input}")
-
-        # Fängt Strg+C ab
-        except KeyboardInterrupt: 
-            start_ui.draw_exit_panel()
-        # Fängt Strg+D ab
-        except EOFError: 
-            start_ui.draw_exit_panel()
-
-
-
-
-
-
-
-
-
-
-
-def start_debts():
-    
-    start_ui = UI()
-    start_ui.draw_menu_panel("debts")
-
-    
-    command = ["start", "help", "exit", "back"]
-    command_completer = WordCompleter(command, ignore_case=True)
-
-    while True:
-        try:
-            user_input = prompt(
-                "debts -- enter command: ", 
-                completer=command_completer
-            ).strip().lower()
-
-            if user_input == "exit":
-                start_ui.draw_exit_panel()
-            elif user_input == "back":
-                return
-
-            elif user_input == "help":
-                print("no help for you")
-
-            elif user_input == "start":
-                start_ui.draw_header("you will be forwarded")
-                
-    
-
-
-
-
-
-
-
-
-
-            elif user_input == "":
-                continue
-            else: 
-                console.print(f"[red]Unknown command:[/red] {user_input}")
-
-        # Fängt Strg+C ab
-        except KeyboardInterrupt: 
-            start_ui.draw_exit_panel()
-        # Fängt Strg+D ab
-        except EOFError: 
-            start_ui.draw_exit_panel()
-
-
-
 
 
 
@@ -324,23 +152,15 @@ def start_importer():
 
 
 
-
-
-
             elif user_input == "":
                 continue
             else: 
                 console.print(f"[red]Unknown command:[/red] {user_input}")
 
         # Fängt Strg+C ab
-        except KeyboardInterrupt: 
-            start_ui.draw_exit_panel()
-        # Fängt Strg+D ab
-        except EOFError: 
-            start_ui.draw_exit_panel()
-
-
-
+        except KeyboardInterrupt,EOFError: 
+            #start_ui.draw_exit_panel()
+            return
 
 
 

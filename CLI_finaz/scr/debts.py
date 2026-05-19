@@ -293,7 +293,8 @@ def _edit_person(ui: UI, listen_id: int, person: str) -> None:
                 completer=completer,
             ).strip().lower()
         except (KeyboardInterrupt, EOFError):
-            ui.draw_exit_panel()
+            #ui.draw_exit_panel()
+            return
 
         if user_input == "":
             continue
@@ -409,7 +410,8 @@ def _debts_edit(ui: UI) -> None:
                 completer=completer,
             ).strip().lower()
         except (KeyboardInterrupt, EOFError):
-            ui.draw_exit_panel()
+            #ui.draw_exit_panel()
+            return
 
         if user_input == "":
             continue
@@ -523,7 +525,8 @@ def _show_debts(ui: UI) -> None:
                 completer=completer,
             ).strip().lower()
         except (KeyboardInterrupt, EOFError):
-            ui.draw_exit_panel()
+            #ui.draw_exit_panel()
+            return
 
         if user_input == "":
             continue
@@ -602,7 +605,8 @@ def manage_debts() -> None:
                 completer=completer,
             ).strip().lower()
         except (KeyboardInterrupt, EOFError):
-            ui.draw_exit_panel()
+            #ui.draw_exit_panel()
+            return
 
         if user_input == "":
             continue
