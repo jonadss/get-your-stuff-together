@@ -825,7 +825,8 @@ def manage_evaluation() -> None:
                 completer=completer,
             ).strip().lower()
         except (KeyboardInterrupt, EOFError):
-            ui.draw_exit_panel()
+            #ui.draw_exit_panel()
+            return
 
         if user_input == "":
             continue

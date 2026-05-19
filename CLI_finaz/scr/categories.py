@@ -134,8 +134,12 @@ def manage_categories():
 
     commands = ["new", "delete", "wordpool", "apply", "help", "back", "exit"]
 
+
+    _draw_kategorien_panel(ui, kategorien)
+
+    
     while True:
-        _draw_kategorien_panel(ui, kategorien)
+        
         completer = WordCompleter(commands, ignore_case=True)
 
         try:
@@ -156,13 +160,13 @@ def manage_categories():
             ui.draw_exit_panel()
 
         elif user_input == "help":
-            ui.draw_header(
-                "[bold #fa7ff6]new[/]      – Neue Kategorie erstellen\n"
-                "[bold #fa7ff6]delete[/]   – Kategorie löschen\n"
-                "[bold #fa7ff6]wordpool[/] – Wörter einer Kategorie bearbeiten\n"
-                "[bold #fa7ff6]apply[/]    – Kategorien auf Datenbank anwenden\n"
-                "[bold #fa7ff6]back[/]     – Zurück"
-            )
+                console.print("\n[bold cyan]Available commands:[/bold cyan]")
+                console.print("  [green]new[/green]       – create a new category")
+                console.print("  [green]delete[/green]    – delete a category")
+                console.print("  [green]wordpool[/green]  – edit the word pool of a category")
+                console.print("  [green]apply[/green]     – apply categories to the database")
+                console.print("  [green]back[/green]      – go back")
+                console.print("  [green]exit[/green]      – quit the program\n")
 
         # neu kategorie
         elif user_input == "new":
