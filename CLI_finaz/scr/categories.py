@@ -144,8 +144,8 @@ def manage_categories():
                 completer=completer,
             ).strip().lower()
         except (KeyboardInterrupt, EOFError):
-            ui.draw_exit_panel()
-
+            #ui.draw_exit_panel()
+            return
         if user_input == "":
             continue
 
@@ -251,7 +251,8 @@ def _manage_wordpool(ui: UI, kategorien: dict) -> None:
                 completer=completer,
             ).strip().lower()
         except (KeyboardInterrupt, EOFError):
-            ui.draw_exit_panel()
+            #ui.draw_exit_panel()
+            return
 
         if user_input == "":
             continue
