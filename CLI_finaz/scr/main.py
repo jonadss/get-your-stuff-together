@@ -151,8 +151,7 @@ def start_importer():
             elif user_input == "import":
                 from import_csv import main_import
                 main_import()
-                from categories import start_category_update
-                start_category_update()
+
             elif user_input == "delete db":
                 from import_csv import clear_database
                 clear_database()
