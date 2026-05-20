@@ -1,1 +1,62 @@
-{}
+{
+  "Lebensmittel": {
+    "limit": 310,
+    "zeitraum": "monat"
+  },
+  "Restaurants & Essen": {
+    "limit": 30,
+    "zeitraum": "monat"
+  },
+  "Mobilität & Tanken": {
+    "limit": 50,
+    "zeitraum": "monat"
+  },
+  "ÖPNV & Bahn": {
+    "limit": 20,
+    "zeitraum": "monat"
+  },
+  "Online-Shopping": {
+    "limit": 15,
+    "zeitraum": "monat"
+  },
+  "Drogerie & Gesundheit": {
+    "limit": 10,
+    "zeitraum": "monat"
+  },
+  "Streaming & Unterhaltung": {
+    "limit": 30,
+    "zeitraum": "monat"
+  },
+  "Versicherungen": {
+    "limit": 80,
+    "zeitraum": "monat"
+  },
+  "Miete & Nebenkosten": {
+    "limit": 440,
+    "zeitraum": "monat"
+  },
+  "Telefon & Internet": {
+    "limit": 40,
+    "zeitraum": "monat"
+  },
+  "Kleidung & Mode": {
+    "limit": 20,
+    "zeitraum": "monat"
+  },
+  "Sport & Freizeit": {
+    "limit": 10,
+    "zeitraum": "monat"
+  },
+  "Bildung": {
+    "limit": 30,
+    "zeitraum": "monat"
+  },
+  "Reisen & Urlaub": {
+    "limit": 5,
+    "zeitraum": "monat"
+  },
+  "Sparen & Investments": {
+    "limit": 5,
+    "zeitraum": "monat"
+  }
+}
