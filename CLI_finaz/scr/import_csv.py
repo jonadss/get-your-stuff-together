@@ -278,6 +278,10 @@ def main_import():
                 log_import_eintragen(id_vor + 1, id_nach, neu, CSV_PFAD)
 
             bericht_ausgeben(gesamt, neu, start)
+            
+            #wrapper triggern       
+            from categories import start_category_update
+            start_category_update()
 
     except sqlite3.OperationalError as e:
         print(f"\nERROR (database): {e}")

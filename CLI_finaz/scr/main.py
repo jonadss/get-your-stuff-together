@@ -18,7 +18,7 @@ def start_balance_overview():
         new_saldo = start_saldo_request()
         start_ui.draw_balance_overview_panel(saldo=new_saldo)
     
-    command = ["show history","importer","categories","debts","budget","evaluation", "help", "exit", "back"]
+    command = ["show history","importer","evaluation","debts","categories","budget", "help", "exit", "back"]
     command_completer = WordCompleter(command, ignore_case=True)
 
 
@@ -151,6 +151,8 @@ def start_importer():
             elif user_input == "import":
                 from import_csv import main_import
                 main_import()
+                from categories import start_category_update
+                start_category_update()
             elif user_input == "delete db":
                 from import_csv import clear_database
                 clear_database()
@@ -163,6 +165,11 @@ def start_importer():
             elif user_input == "delete csv":
                 from import_csv import delete_csv_from_db
                 delete_csv_from_db()
+            
+            
+            #easter egg
+            elif user_input == "67" or user_input == "lol":
+                start_ui.crazy_frog()
 
 
 

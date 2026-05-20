@@ -253,20 +253,22 @@ class UI:
             self.console.show_cursor(True)
 
     def draw_exit_panel(self):
+        try:
+            with Live(self._build_grid_panel(middle_title="Good byeeee"), 
+                      console=self.console, 
+                      refresh_per_second=10) as live:
+                start_time = time.time()
+                while time.time() - start_time < 1:
 
-        with Live(self._build_grid_panel(middle_title="Good byeeee"), 
-                  console=self.console, 
-                  refresh_per_second=10) as live:
-            start_time = time.time()
-            while time.time() - start_time < 1:
+                    is_winking = int(time.time() * 2) % 2 == 0
 
-                is_winking = int(time.time() * 2) % 2 == 0
+                    live.update(self._build_grid_panel(wink=is_winking, middle_title="Good byeeee"))
+                    time.sleep(0.1)
+                live.update(self._build_grid_panel(wink=False, middle_title="Good byeeee"))
 
-                live.update(self._build_grid_panel(wink=is_winking, middle_title="Good byeeee"))
-                time.sleep(0.1)
-            live.update(self._build_grid_panel(wink=False, middle_title="Good byeeee"))
-        sys.exit(1)
-        
+            sys.exit(1)
+        except KeyboardInterrupt:
+            sys.exit(1)
 
 
 
