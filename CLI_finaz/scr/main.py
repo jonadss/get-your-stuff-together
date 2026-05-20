@@ -8,74 +8,19 @@ from request import overview, start_saldo_request, DB_PFAD
 import sqlite3
 
 
-
-def start_app():
-    start_ui = UI()
-    start_ui.draw_welcom_panel(2)
-
-    
-
-
-
-
-    command = ["start", "help", "exit"]
-    command_completer = WordCompleter(command, ignore_case=True)
-
-    while True:
-        try:
-            user_input = prompt(
-                "euer volk hungert mein lord  ", 
-                completer=command_completer
-            ).strip().lower()
-
-            if user_input == "exit":
-                start_ui.draw_exit_panel()
-            
-            
-            elif user_input == "help":
-                print("no help for you")
-
-            elif user_input == "start":
-
-                start_ui.play_loading("Load bank balance ...")
-                start_balance_overview()
-                start_ui.draw_welcom_panel(1)
-                
-        
-            elif user_input == "frogi":
-                start_ui.crazy_frog()
-   
-            elif user_input == "":
-                continue
-            else: 
-                console.print(f"[red]Unknown command:[/red] {user_input}")
-
-        # Fängt Strg+C ab
-        except KeyboardInterrupt: 
-            start_ui.draw_exit_panel()
-
-        # Fängt Strg+D ab
-        except EOFError: 
-            start_ui.draw_exit_panel()
-            
-
-
 def start_balance_overview():
     
     start_ui = UI()
-
-    
-    command = ["show history","importer","categories","debts","budget","evaluation", "help", "exit", "back"]
-    command_completer = WordCompleter(command, ignore_case=True)
-
-
-
-
+    #help func
     def draw_balance_overview():
         start_ui = UI()
         
         new_saldo = start_saldo_request()
         start_ui.draw_balance_overview_panel(saldo=new_saldo)
+    
+    command = ["show history","importer","evaluation","debts","categories","budget", "help", "exit", "back"]
+    command_completer = WordCompleter(command, ignore_case=True)
+
 
 
     draw_balance_overview()
@@ -95,7 +40,15 @@ def start_balance_overview():
                 
 
             elif user_input == "help":
-                print("no help for you")
+                console.print("\n[bold cyan]Available commands:[/bold cyan]")
+                console.print("  [green]show history[/green]  – show all imported transactions")
+                console.print("  [green]importer[/green]      – import CSV files into the database")
+                console.print("  [green]categories[/green]    – manage transaction categories")
+                console.print("  [green]debts[/green]         – manage debts and credits")
+                console.print("  [green]budget[/green]        – manage monthly budgets")
+                console.print("  [green]evaluation[/green]    – show spending evaluations and charts")
+                console.print("  [green]back[/green]          – go back")
+                console.print("  [green]exit[/green]          – quit the program\n")
 
 
 
@@ -110,9 +63,12 @@ def start_balance_overview():
 
             elif user_input == "show history":
                 start_ui.play_loading("Load history...")
-                rows = overview(sqlite3.connect(DB_PFAD))
-                
-                start_ui.draw_overview_table(rows)
+                try:
+                    rows = overview(sqlite3.connect(DB_PFAD))
+                except sqlite3.OperationalError:
+                    print("ERROR: Table not found – please import data first.")
+                else:
+                    start_ui.draw_overview_table(rows)
                   
 
 
@@ -150,177 +106,8 @@ def start_balance_overview():
                 console.print(f"[red]Unknown command:[/red] {user_input}")
 
         # Fängt Strg+C ab
-        except KeyboardInterrupt: 
+        except KeyboardInterrupt,EOFError: 
             start_ui.draw_exit_panel()
-            
-        # Fängt Strg+D ab
-        except EOFError: 
-            start_ui.draw_exit_panel()
-            
-
-
-
-def start_budget():
-    
-    start_ui = UI()
-    start_ui.draw_menu_panel("budget")
-    
-    command = ["start", "help", "exit", "back"]
-    command_completer = WordCompleter(command, ignore_case=True)
-
-    while True:
-        try:
-            user_input = prompt(
-                "categories -- enter command: ", 
-                completer=command_completer
-            ).strip().lower()
-
-            if user_input == "exit":
-                start_ui.draw_exit_panel()
-            elif user_input == "back":
-                return
-
-            elif user_input == "help":
-                print("no help for you")
-
-            elif user_input == "start":
-                start_ui.draw_header("you will be forwarded")
-                
-    
-
-
-
-
-
-
-
-
-
-            elif user_input == "":
-                continue
-            else: 
-                console.print(f"[red]Unknown command:[/red] {user_input}")
-
-        # Fängt Strg+C ab
-        except KeyboardInterrupt: 
-            start_ui.draw_exit_panel()
-        # Fängt Strg+D ab
-        except EOFError: 
-            start_ui.draw_exit_panel()
-
-
-
-
-def start_categories():
-    
-    start_ui = UI()
-    start_ui.draw_menu_panel("budget")
-
-    
-    command = ["start", "help", "exit", "back"]
-    command_completer = WordCompleter(command, ignore_case=True)
-
-    while True:
-        try:
-            user_input = prompt(
-                "categories -- enter command: ", 
-                completer=command_completer
-            ).strip().lower()
-
-            if user_input == "exit":
-                start_ui.draw_exit_panel()
-            elif user_input == "back":
-                return
-
-            elif user_input == "help":
-                print("no help for you")
-
-            elif user_input == "start":
-                start_ui.draw_header("you will be forwarded")
-                
-    
-
-
-
-
-
-
-
-
-
-            elif user_input == "":
-                continue
-            else: 
-                console.print(f"[red]Unknown command:[/red] {user_input}")
-
-        # Fängt Strg+C ab
-        except KeyboardInterrupt: 
-            start_ui.draw_exit_panel()
-        # Fängt Strg+D ab
-        except EOFError: 
-            start_ui.draw_exit_panel()
-
-
-
-
-
-
-
-
-
-
-
-def start_debts():
-    
-    start_ui = UI()
-    start_ui.draw_menu_panel("debts")
-
-    
-    command = ["start", "help", "exit", "back"]
-    command_completer = WordCompleter(command, ignore_case=True)
-
-    while True:
-        try:
-            user_input = prompt(
-                "debts -- enter command: ", 
-                completer=command_completer
-            ).strip().lower()
-
-            if user_input == "exit":
-                start_ui.draw_exit_panel()
-            elif user_input == "back":
-                return
-
-            elif user_input == "help":
-                print("no help for you")
-
-            elif user_input == "start":
-                start_ui.draw_header("you will be forwarded")
-                
-    
-
-
-
-
-
-
-
-
-
-            elif user_input == "":
-                continue
-            else: 
-                console.print(f"[red]Unknown command:[/red] {user_input}")
-
-        # Fängt Strg+C ab
-        except KeyboardInterrupt: 
-            start_ui.draw_exit_panel()
-        # Fängt Strg+D ab
-        except EOFError: 
-            start_ui.draw_exit_panel()
-
-
-
 
 
 
@@ -346,7 +133,14 @@ def start_importer():
                 return
 
             elif user_input == "help":
-                print("no help for you")
+                console.print("\n[bold cyan]Available commands:[/bold cyan]")
+                console.print("  [green]choose path[/green]  – set the path to a CSV file")
+                console.print("  [green]import[/green]       – import the selected CSV into the database")
+                console.print("  [green]undo import[/green]  – revert the last import")
+                console.print("  [green]delete csv[/green]   – remove the selected CSV file from the database")
+                console.print("  [green]delete db[/green]    – clear the entire database")
+                console.print("  [green]back[/green]         – go back")
+                console.print("  [green]exit[/green]         – quit the program\n")
 
             elif user_input == "choose path":
                 from import_csv import user_interaktion
@@ -357,6 +151,7 @@ def start_importer():
             elif user_input == "import":
                 from import_csv import main_import
                 main_import()
+
             elif user_input == "delete db":
                 from import_csv import clear_database
                 clear_database()
@@ -369,9 +164,11 @@ def start_importer():
             elif user_input == "delete csv":
                 from import_csv import delete_csv_from_db
                 delete_csv_from_db()
-
-
-
+            
+            
+            #easter egg
+            elif user_input == "67" or user_input == "lol":
+                start_ui.crazy_frog()
 
 
 
@@ -382,18 +179,17 @@ def start_importer():
                 console.print(f"[red]Unknown command:[/red] {user_input}")
 
         # Fängt Strg+C ab
-        except KeyboardInterrupt: 
-            start_ui.draw_exit_panel()
-        # Fängt Strg+D ab
-        except EOFError: 
-            start_ui.draw_exit_panel()
-
-
-
+        except KeyboardInterrupt,EOFError: 
+            #start_ui.draw_exit_panel()
+            return
 
 
 
 from startup_check import startup_check
 if __name__ == "__main__":
     startup_check()
-    start_app()
+    
+    start_ui = UI()
+    start_ui.draw_welcom_panel(4)
+    
+    start_balance_overview()

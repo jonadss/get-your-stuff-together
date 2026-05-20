@@ -122,9 +122,9 @@ def _draw_debts_panel(ui: UI, cursor: sqlite3.Cursor) -> None:
     kopf.add_column(justify="center", ratio=1)
 
     kopf.add_row(
-        Text(f"Gesamt offene Schulden:  {gesamt:>+.2f} €",   style="bold #fa7ff6"),
-        Text(f"Forderungen:  {gesamt_ford:>+.2f} €",          style="bold green"),
-        Text(f"Schulden:  {gesamt_schuld:>+.2f} €",           style="bold red"),
+        Text(f"Total outstanding:  {gesamt:>+.2f} €",   style="bold #fa7ff6"),
+        Text(f"Receivables:  {gesamt_ford:>+.2f} €",   style="bold green"),
+        Text(f"Debts:  {gesamt_schuld:>+.2f} €",       style="bold red"),
     )
 
     # ── Pro-Person-Tabellen ──────────────────────────────────────────────────
@@ -132,7 +132,7 @@ def _draw_debts_panel(ui: UI, cursor: sqlite3.Cursor) -> None:
 
     if not personen_daten:
         alle_gruppen.append(
-            Align.center(Text("Keine Listen vorhanden", style="italic #888888"))
+            Align.center(Text("No lists found", style="italic #888888"))
         )
     else:
         for person, summe, eintraege in personen_daten:
@@ -140,7 +140,7 @@ def _draw_debts_panel(ui: UI, cursor: sqlite3.Cursor) -> None:
 
             # Person-Header
             person_header = Text(
-                f"  {person}  –  Summe: {summe:>+.2f} €  ({len(eintraege)} Einträge)",
+                f"  {person}  –  Total: {summe:>+.2f} €  ({len(eintraege)} entries)",
                 style=f"bold white"
             )
 
@@ -154,9 +154,9 @@ def _draw_debts_panel(ui: UI, cursor: sqlite3.Cursor) -> None:
                 show_edge=False,
             )
             ptable.add_column("ID",        width=5,  justify="right", style="#555555")
-            ptable.add_column("Datum",     width=12, justify="center", style="italic #aaaaaa")
-            ptable.add_column("Betrag (€)",width=13, justify="right")
-            ptable.add_column("Grund",     ratio=1,  style="#888888")
+            ptable.add_column("Date",      width=12, justify="center", style="italic #aaaaaa")
+            ptable.add_column("Amount (€)",width=13, justify="right")
+            ptable.add_column("Reason",    ratio=1,  style="#888888")
 
             if eintraege:
                 for eintrag_id, betrag, grund, datum in eintraege:
@@ -171,7 +171,7 @@ def _draw_debts_panel(ui: UI, cursor: sqlite3.Cursor) -> None:
                         grund_kurz,
                     )
             else:
-                ptable.add_row("–", "–", "–", "[italic #555555]Keine Einträge[/]")
+                ptable.add_row("–", "–", "–", "[italic #555555]No entries[/]")
 
             alle_gruppen.append(person_header)
             alle_gruppen.append(ptable)
@@ -179,7 +179,7 @@ def _draw_debts_panel(ui: UI, cursor: sqlite3.Cursor) -> None:
 
     console.print(Panel(
         Group(*alle_gruppen),
-        title="[bold green]Schulden-Übersicht[/]",
+        title="[bold green]Debt Overview[/]",
         border_style="bold blue",
         box=box.ROUNDED,
     ))
@@ -197,9 +197,9 @@ def _draw_person_table(ui: UI, person: str, eintraege: list[tuple]) -> None:
         padding=(0, 1),
     )
     table.add_column("ID",        width=6,  justify="right", style="#808080")
-    table.add_column("Datum",     width=12, justify="center", style="italic white")
-    table.add_column("Betrag (€)",width=14, justify="right")
-    table.add_column("Grund",     ratio=1,  style="#888888")
+    table.add_column("Date",      width=12, justify="center", style="italic white")
+    table.add_column("Amount (€)",width=14, justify="right")
+    table.add_column("Reason",    ratio=1,  style="#888888")
 
     summe = 0.0
     for eintrag_id, betrag, grund, datum in eintraege:
@@ -216,10 +216,10 @@ def _draw_person_table(ui: UI, person: str, eintraege: list[tuple]) -> None:
         )
 
     if not eintraege:
-        table.add_row("–", "–", "–", "[italic #888888]Keine Einträge[/]")
+        table.add_row("–", "–", "–", "[italic #888888]No entries[/]")
 
     titel = Text(
-        f"Schulden – {person}  |  Summe: {summe:>+.2f} €  |  {len(eintraege)} Einträge",
+        f"Debts – {person}  |  Total: {summe:>+.2f} €  |  {len(eintraege)} entries",
         style="#fa7ff6"
     )
 
@@ -236,7 +236,7 @@ def _draw_person_table(ui: UI, person: str, eintraege: list[tuple]) -> None:
     inhalt = buf.getvalue()
 
     subprocess.run(
-        ["less", "-R", "-S", "--prompt= Scrollen: Pfeiltasten | q = zurück"],
+        ["less", "-R", "-S", "--prompt= Scroll: arrow keys | q = back"],
         input=inhalt, text=True
     )
 
@@ -249,12 +249,12 @@ def _eingabe_betrag(ui: UI) -> float | None:
     """Fragt nach einem Betrag mit Fehlerabfang. Gibt None zurück bei Abbruch."""
     while True:
         try:
-            raw = prompt("  Betrag (€) – negativ = ich schulde, positiv = mir wird geschuldet: ").strip()
+            raw = prompt("  Amount (€) – negative = I owe, positive = I am owed: ").strip()
         except (KeyboardInterrupt, EOFError):
             return None
 
         if raw == "":
-            ui.draw_header("[yellow]Kein Betrag eingegeben.[/yellow]")
+            ui.draw_header("[yellow]No amount entered.[/yellow]")
             continue
 
         # Deutsches Komma erlauben
@@ -293,7 +293,8 @@ def _edit_person(ui: UI, listen_id: int, person: str) -> None:
                 completer=completer,
             ).strip().lower()
         except (KeyboardInterrupt, EOFError):
-            ui.draw_exit_panel()
+            #ui.draw_exit_panel()
+            return
 
         if user_input == "":
             continue
@@ -311,7 +312,7 @@ def _edit_person(ui: UI, listen_id: int, person: str) -> None:
                 continue
 
             try:
-                grund = prompt("  Grund (optional, Enter = leer): ").strip()
+                grund = prompt("  Reason (optional, Enter = skip): ").strip()
             except (KeyboardInterrupt, EOFError):
                 continue
 
@@ -325,19 +326,19 @@ def _edit_person(ui: UI, listen_id: int, person: str) -> None:
                 conn.commit()
 
             ui.draw_header(
-                f"[green]Eintrag hinzugefügt:[/green] "
+                f"[green]Entry added:[/green] "
                 f"[bold]{betrag:+.2f} €[/bold]"
                 + (f"  –  {grund}" if grund else "")
             )
 
-        
+
         elif user_input == "remove":
             if not eintraege:
-                ui.draw_header("[yellow]Keine Einträge vorhanden.[/yellow]")
+                ui.draw_header("[yellow]No entries found.[/yellow]")
                 continue
 
-            
-            auswahl_map = {}  # Anzeige-String → eintrag_id
+
+            auswahl_map = {}  # display string → eintrag_id
             for eintrag_id, betrag, grund, datum in eintraege:
                 vorzeichen = "+" if betrag >= 0 else ""
                 grund_kurz = str(grund or "–")[:30]
@@ -349,7 +350,7 @@ def _edit_person(ui: UI, listen_id: int, person: str) -> None:
                     "\n".join(
                         f"  [#808080]{k}[/]" for k in auswahl_map
                     ),
-                    title="[bold #fa7ff6]Eintrag auswählen[/]",
+                    title="[bold #fa7ff6]Select entry[/]",
                     border_style="blue",
                     box=box.ROUNDED,
                 )
@@ -358,19 +359,19 @@ def _edit_person(ui: UI, listen_id: int, person: str) -> None:
             id_completer = WordCompleter(list(auswahl_map.keys()), ignore_case=True)
             try:
                 auswahl = prompt(
-                    "  Eintrag zum Löschen (Tab = Vorschläge): ",
+                    "  Entry to delete (Tab = suggestions): ",
                     completer=id_completer,
                 ).strip()
             except (KeyboardInterrupt, EOFError):
                 continue
 
-            
+
             if auswahl.isdigit() and int(auswahl) in auswahl_map.values():
                 del_id = int(auswahl)
             elif auswahl in auswahl_map:
                 del_id = auswahl_map[auswahl]
             else:
-                ui.draw_header(f"[red]Ungültige Auswahl.[/red]")
+                ui.draw_header(f"[red]Invalid selection.[/red]")
                 continue
 
             with _db_connect() as conn:
@@ -380,10 +381,10 @@ def _edit_person(ui: UI, listen_id: int, person: str) -> None:
                 )
                 conn.commit()
 
-            ui.draw_header(f"[green]Eintrag [bold]{del_id}[/bold] gelöscht.[/green]")
+            ui.draw_header(f"[green]Entry [bold]{del_id}[/bold] deleted.[/green]")
 
         else:
-            console.print(f"[red]Unbekanntes Kommando:[/red] {user_input}")
+            console.print(f"[red]Unknown command:[/red] {user_input}")
 
 
 # ──────────────────────────────────────────────
@@ -409,7 +410,8 @@ def _debts_edit(ui: UI) -> None:
                 completer=completer,
             ).strip().lower()
         except (KeyboardInterrupt, EOFError):
-            ui.draw_exit_panel()
+            #ui.draw_exit_panel()
+            return
 
         if user_input == "":
             continue
@@ -423,12 +425,12 @@ def _debts_edit(ui: UI) -> None:
         # ── Neue Liste ───────────────────────────────────────────────────────
         elif user_input == "new":
             try:
-                person = prompt("  Name der Person: ").strip()
+                person = prompt("  Person's name: ").strip()
             except (KeyboardInterrupt, EOFError):
                 continue
 
             if not person:
-                ui.draw_header("[yellow]Kein Name eingegeben.[/yellow]")
+                ui.draw_header("[yellow]No name entered.[/yellow]")
                 continue
 
             datum = datetime.now().strftime("%d.%m.%Y")
@@ -439,20 +441,20 @@ def _debts_edit(ui: UI) -> None:
                         (person, datum)
                     )
                     conn.commit()
-                ui.draw_header(f"[green]Liste für '[bold]{person}[/bold]' erstellt.[/green]")
+                ui.draw_header(f"[green]List for '[bold]{person}[/bold]' created.[/green]")
             except sqlite3.IntegrityError:
-                ui.draw_header(f"[yellow]Person '[bold]{person}[/bold]' existiert bereits.[/yellow]")
+                ui.draw_header(f"[yellow]Person '[bold]{person}[/bold]' already exists.[/yellow]")
 
-        # ── Liste löschen ────────────────────────────────────────────────────
+        # ── delete list ──────────────────────────────────────────────────────
         elif user_input == "delete":
             if not personen:
-                ui.draw_header("[yellow]Keine Listen vorhanden.[/yellow]")
+                ui.draw_header("[yellow]No lists found.[/yellow]")
                 continue
 
             del_completer = WordCompleter(personen_namen, ignore_case=True)
             try:
                 person = prompt(
-                    "  Person löschen: ",
+                    "  Person to delete: ",
                     completer=del_completer,
                 ).strip()
             except (KeyboardInterrupt, EOFError):
@@ -460,7 +462,7 @@ def _debts_edit(ui: UI) -> None:
 
             match = [(lid, p) for lid, p in personen if p.lower() == person.lower()]
             if not match:
-                ui.draw_header(f"[red]Person '[bold]{person}[/bold]' nicht gefunden.[/red]")
+                ui.draw_header(f"[red]Person '[bold]{person}[/bold]' not found.[/red]")
                 continue
 
             listen_id, person_name = match[0]
@@ -471,19 +473,19 @@ def _debts_edit(ui: UI) -> None:
                 )
                 conn.commit()
             ui.draw_header(
-                f"[green]Liste für '[bold]{person_name}[/bold]' und alle Einträge gelöscht.[/green]"
+                f"[green]List for '[bold]{person_name}[/bold]' and all entries deleted.[/green]"
             )
 
-        # ── Liste bearbeiten ─────────────────────────────────────────────────
+        # ── edit list ────────────────────────────────────────────────────────
         elif user_input == "edit":
             if not personen:
-                ui.draw_header("[yellow]Keine Listen vorhanden.[/yellow]")
+                ui.draw_header("[yellow]No lists found.[/yellow]")
                 continue
 
             edit_completer = WordCompleter(personen_namen, ignore_case=True)
             try:
                 person = prompt(
-                    "  Person auswählen: ",
+                    "  Select person: ",
                     completer=edit_completer,
                 ).strip()
             except (KeyboardInterrupt, EOFError):
@@ -491,14 +493,14 @@ def _debts_edit(ui: UI) -> None:
 
             match = [(lid, p) for lid, p in personen if p.lower() == person.lower()]
             if not match:
-                ui.draw_header(f"[red]Person '[bold]{person}[/bold]' nicht gefunden.[/red]")
+                ui.draw_header(f"[red]Person '[bold]{person}[/bold]' not found.[/red]")
                 continue
 
             listen_id, person_name = match[0]
             _edit_person(ui, listen_id, person_name)
 
         else:
-            console.print(f"[red]Unbekanntes Kommando:[/red] {user_input}")
+            console.print(f"[red]Unknown command:[/red] {user_input}")
 
 
 # ──────────────────────────────────────────────
@@ -523,7 +525,8 @@ def _show_debts(ui: UI) -> None:
                 completer=completer,
             ).strip().lower()
         except (KeyboardInterrupt, EOFError):
-            ui.draw_exit_panel()
+            #ui.draw_exit_panel()
+            return
 
         if user_input == "":
             continue
@@ -543,13 +546,13 @@ def _show_debts(ui: UI) -> None:
         
         elif user_input == "person":
             if not personen:
-                ui.draw_header("[yellow]Keine Listen vorhanden.[/yellow]")
+                ui.draw_header("[yellow]No lists found.[/yellow]")
                 continue
 
             per_completer = WordCompleter(personen_namen, ignore_case=True)
             try:
                 person = prompt(
-                    "  Person auswählen: ",
+                    "  Select person: ",
                     completer=per_completer,
                 ).strip()
             except (KeyboardInterrupt, EOFError):
@@ -557,7 +560,7 @@ def _show_debts(ui: UI) -> None:
 
             match = [(lid, p) for lid, p in personen if p.lower() == person.lower()]
             if not match:
-                ui.draw_header(f"[red]Person '[bold]{person}[/bold]' nicht gefunden.[/red]")
+                ui.draw_header(f"[red]Person '[bold]{person}[/bold]' not found.[/red]")
                 continue
 
             listen_id, person_name = match[0]
@@ -567,7 +570,7 @@ def _show_debts(ui: UI) -> None:
             _draw_person_table(ui, person_name, eintraege)
 
         else:
-            console.print(f"[red]Unbekanntes Kommando:[/red] {user_input}")
+            console.print(f"[red]Unknown command:[/red] {user_input}")
 
 
 # ──────────────────────────────────────────────
@@ -584,15 +587,17 @@ def manage_debts() -> None:
             _tabellen_erstellen(conn.cursor())
             conn.commit()
     except sqlite3.OperationalError as e:
-        ui.draw_header(f"[red]FEHLER (Datenbank):[/red] {e}")
+        ui.draw_header(f"[red]ERROR (database):[/red] {e}")
         return
 
     commands = ["show debts", "debts edit", "help", "back", "exit"]
+    
+    
+    with _db_connect() as conn:
+        cur = conn.cursor()
+        _draw_debts_panel(ui, cur)
 
     while True:
-        with _db_connect() as conn:
-            cur = conn.cursor()
-            _draw_debts_panel(ui, cur)
 
         completer = WordCompleter(commands, ignore_case=True)
 
@@ -602,7 +607,8 @@ def manage_debts() -> None:
                 completer=completer,
             ).strip().lower()
         except (KeyboardInterrupt, EOFError):
-            ui.draw_exit_panel()
+            #ui.draw_exit_panel()
+            return
 
         if user_input == "":
             continue
@@ -614,19 +620,18 @@ def manage_debts() -> None:
             ui.draw_exit_panel()
 
         elif user_input == "help":
-            ui.draw_header(
-                "[bold #fa7ff6]show debts[/]   – Schulden anzeigen\n"
-                "  [#888888]all[/]            – Übersicht aller Personen mit Gesamtsumme\n"
-                "  [#888888]person[/]         – Detailansicht einer einzelnen Person\n\n"
-                "[bold #fa7ff6]debts edit[/]   – Listen und Einträge verwalten\n"
-                "  [#888888]new[/]            – Neue Schuldner-Liste anlegen\n"
-                "  [#888888]delete[/]         – Schuldner-Liste löschen (inkl. alle Einträge)\n"
-                "  [#888888]edit[/]           – Person auswählen und Einträge bearbeiten\n"
-                "    [#888888]add[/]          – Neuen Schulden-Eintrag hinzufügen\n"
-                "    [#888888]remove[/]       – Eintrag per ID löschen\n\n"
-                "[bold #fa7ff6]back[/]         – Zurück zur Balance-Übersicht\n"
-                "[bold #fa7ff6]exit[/]         – App beenden"
-            )
+            console.print("\n[bold cyan]Available commands:[/bold cyan]")
+            console.print("  [green]show debts[/green]    – show the debts overview")
+            console.print("    [green]all[/green]         – summary of all people with totals")
+            console.print("    [green]person[/green]      – detailed view for one person")
+            console.print("  [green]debts edit[/green]    – manage lists and entries")
+            console.print("    [green]new[/green]         – create a new debt list for a person")
+            console.print("    [green]delete[/green]      – delete a person's list and all entries")
+            console.print("    [green]edit[/green]        – select a person to edit their entries")
+            console.print("      [green]add[/green]       – add a new debt entry")
+            console.print("      [green]remove[/green]    – delete an entry by ID")
+            console.print("  [green]back[/green]          – go back")
+            console.print("  [green]exit[/green]          – quit the program\n")
 
         elif user_input == "show debts":
             _show_debts(ui)
@@ -635,6 +640,6 @@ def manage_debts() -> None:
             _debts_edit(ui)
 
         else:
-            console.print(f"[red]Unbekanntes Kommando:[/red] {user_input}")
+            console.print(f"[red]Unknown command:[/red] {user_input}")
 
 
