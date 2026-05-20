@@ -1,6 +1,9 @@
 {
   "einkommen_kategorien": [
-    "weglassen"
+    "weglassen",
+    "Gehalt & Einnahmen"
   ],
-  "fixkosten_kategorien": []
+  "fixkosten_kategorien": [
+    "Miete & Nebenkosten"
+  ]
 }
