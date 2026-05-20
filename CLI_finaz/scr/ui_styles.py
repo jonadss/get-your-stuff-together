@@ -120,14 +120,14 @@ class UI:
             padding=(0, 1),
         )
 
-        table.add_column("Datum",      width=12, justify="center")
-        table.add_column("Betrag (€)", width=14, justify="right")
+        table.add_column("Date",       width=12, justify="center")
+        table.add_column("Amount (€)", width=14, justify="right")
         if zeige_saldo:
-            table.add_column("Saldo (€)",  width=14, justify="right")
+            table.add_column("Balance (€)", width=14, justify="right")
         if zeige_zweck:
-            table.add_column("Verwendungszweck", ratio=1)
+            table.add_column("Description", ratio=1)
         if zeige_category:
-            table.add_column("Kategorie", width=16, justify="left")
+            table.add_column("Category", width=16, justify="left")
 
         for row in transaktionen:
             buchungs_id, datum, betrag, saldo, zweck, category = row
@@ -156,7 +156,7 @@ class UI:
             table.add_row(*zeile)
     
         titel_text = Text(
-            f"Transaktions-Übersicht  –  {len(transaktionen)} Einträge  (neueste oben)",
+            f"Transaction Overview  –  {len(transaktionen)} entries  (newest first)",
             style="#fa7ff6"
         )
     
@@ -179,7 +179,7 @@ class UI:
     
         # Über less ausgeben – bleibt am Anfang, q zum Beenden
         import subprocess
-        subprocess.run(["less", "-R", "-S", "--prompt= Scrollen: Pfeiltasten | q = zurück"], 
+        subprocess.run(["less", "-R", "-S", "--prompt= Scroll: arrow keys | q = back"],
                        input=inhalt, text=True)
 
     def draw_importer_panel(self,middle_title,path=None):
@@ -223,7 +223,7 @@ class UI:
 
 
 
-    def play_loading(self, text="Lade Daten...", length=18):
+    def play_loading(self, text="Loading...", length=18):
         frames = self.get_cachy_frames(length)
 
         try:
@@ -323,7 +323,7 @@ class UI:
         banner.append("  ██╔══╝  ██║██║╚██╗██║██╔══██║██║     \n", "bold #fa7ff6")
         banner.append("  ██║     ██║██║ ╚████║██║  ██║╚██████╗\n", "bold #ff79c6")
         banner.append("  ╚═╝     ╚═╝╚═╝  ╚═══╝╚═╝  ╚═╝ ╚═════╝\n", "bold #ff79c6")
-        banner.append("        Dein persönlicher Finanz-Begleiter\n", "#808080")
+        banner.append("        Your personal finance companion\n", "#808080")
  
 
 
@@ -401,21 +401,21 @@ class UI:
             expand=True,
             padding=(0, 1),
         )
-        table.add_column("Typ",  width=10)
+        table.add_column("Type", width=10)
         table.add_column("Name", ratio=1)
 
         
 
         for e in eintraege:
             if e.is_dir():
-                icon = Text("📁 Ordner", style="blue")
+                icon = Text("📁 Folder", style="blue")
                 name = Text(e.name,      style="bold white")
             elif e.suffix.lower() == ".csv":
                 icon = Text("📄 CSV",    style="bold green")
                 name = Text(e.name,      style="bold green")
             else:
 
-                icon = Text("   Datei",  style="#555555")
+                icon = Text("   File",   style="#555555")
                 name = Text(e.name,      style="#888888")
             table.add_row(icon, name)
 
@@ -452,9 +452,9 @@ class UI:
     def draw_import_start(self, csv_pfad, db_pfad):
         grid = Table.grid(expand=True)
         grid.add_column()
-        grid.add_row(Text("Starte Import...", style="bold #fa7ff6"))
-        grid.add_row(Text(f"Quelle : {csv_pfad}", style="italic white"))
-        grid.add_row(Text(f"Ziel   : {db_pfad}", style="italic white"))
+        grid.add_row(Text("Starting import...", style="bold #fa7ff6"))
+        grid.add_row(Text(f"Source : {csv_pfad}", style="italic white"))
+        grid.add_row(Text(f"Target : {db_pfad}", style="italic white"))
 
         self.console.print(Panel(grid, border_style="bold blue", box=box.MINIMAL))
 
@@ -468,15 +468,15 @@ class UI:
         grid.add_column(style="white")
 
         grid.add_row("CSV",                   str(csv_pfad))
-        grid.add_row("Datenbank",             f"{db_pfad}  ({db_groesse:.1f} KB)")
+        grid.add_row("Database",              f"{db_pfad}  ({db_groesse:.1f} KB)")
         grid.add_row("",                      "")
-        grid.add_row("CSV-Zeilen gesamt",     f"{gesamt:>6}")
-        grid.add_row("Neu importiert",        Text(f"{neu:>6}",       style="bold green"))
-        grid.add_row("Duplikate ignoriert",   Text(f"{duplikate:>6}", style="bold yellow"))
+        grid.add_row("CSV rows total",        f"{gesamt:>6}")
+        grid.add_row("Newly imported",        Text(f"{neu:>6}",       style="bold green"))
+        grid.add_row("Duplicates ignored",    Text(f"{duplikate:>6}", style="bold yellow"))
 
         self.console.print(Panel(
             grid,
-            title="[bold green]Import abgeschlossen[/]",
+            title="[bold green]Import complete[/]",
             border_style="green",
             box=self.box_style,
         ))

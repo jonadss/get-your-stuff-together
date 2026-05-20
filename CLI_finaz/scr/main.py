@@ -66,7 +66,7 @@ def start_balance_overview():
                 try:
                     rows = overview(sqlite3.connect(DB_PFAD))
                 except sqlite3.OperationalError:
-                    print("FEHLER: Tabelle nicht gefunden – bitte zuerst Daten importieren. ")
+                    print("ERROR: Table not found – please import data first.")
                 else:
                     start_ui.draw_overview_table(rows)
                   
