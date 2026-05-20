@@ -19,7 +19,7 @@ def startup_check() -> None:
     
     if not DB_PFAD.exists():
         sqlite3.connect(DB_PFAD).close()
-        print(f"[startup] Datenbank erstellt: {DB_PFAD}")
+        print(f"[startup] Database created: {DB_PFAD}")
 
     
     for json_pfad, leer_inhalt in (
@@ -29,4 +29,4 @@ def startup_check() -> None:
         if not json_pfad.exists():
             with open(json_pfad, "w", encoding="utf-8") as f:
                 json.dump(leer_inhalt, f)
-            print(f"[startup] JSON erstellt:     {json_pfad}")
+            print(f"[startup] JSON created:      {json_pfad}")

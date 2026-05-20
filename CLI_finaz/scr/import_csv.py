@@ -172,7 +172,7 @@ def daten_bereinigen(df: pd.DataFrame) -> pd.DataFrame:
     heute = pd.Timestamp.today().normalize()
     heute_buchungen = (df["_datum_parsed"] == heute).sum()
     if heute_buchungen > 0:
-        print(f"  Übersprungen: {heute_buchungen} Buchung(en) vom heutigen Tag ({heute.strftime('%d.%m.%Y')}) ignoriert.")
+        print(f"  Skipped: {heute_buchungen} transaction(s) from today ({heute.strftime('%d.%m.%Y')}) ignored.")
         df = df[df["_datum_parsed"] < heute].reset_index(drop=True)
 
     return df
@@ -249,13 +249,13 @@ def main_import():
     try:
         df = csv_laden(CSV_PFAD)
     except FileNotFoundError as e:
-        print(f"\nFEHLER: {e}")
+        print(f"\nERROR: {e}")
         return
 
     try:
         df = daten_bereinigen(df)
     except KeyError as e:
-        print(f"\nFEHLER (Spalten): {e}")
+        print(f"\nERROR (columns): {e}")
         return
 
     try:
@@ -280,7 +280,7 @@ def main_import():
             bericht_ausgeben(gesamt, neu, start)
 
     except sqlite3.OperationalError as e:
-        print(f"\nFEHLER (Datenbank): {e}")
+        print(f"\nERROR (database): {e}")
         return
 
 
@@ -303,7 +303,7 @@ def waehle_csv_interaktiv(start_dir):
                 key=lambda x: (not x.is_dir(), x.name.lower())
             )
         except PermissionError:
-            ui.draw_header(f"[red]Zugriff verweigert:[/red] {aktueller_pfad}")
+            ui.draw_header(f"[red]Access denied:[/red] {aktueller_pfad}")
             aktueller_pfad = aktueller_pfad.parent
             continue
 
@@ -321,7 +321,7 @@ def waehle_csv_interaktiv(start_dir):
         # ── Eingabe ──────────────────────────────────────────────────────────
         try:
             user_input = prompt(
-                "importer -- wähle Datei: ",
+                "importer -- select file: ",
                 completer=completer,
             ).strip()
         except (KeyboardInterrupt, EOFError):
@@ -337,7 +337,7 @@ def waehle_csv_interaktiv(start_dir):
         neuer_pfad = (aktueller_pfad / user_input).resolve()
 
         if not neuer_pfad.exists():
-            ui.draw_header(f"[red]Nicht gefunden:[/red] '{user_input}'")
+            ui.draw_header(f"[red]Not found:[/red] '{user_input}'")
             continue
 
         if neuer_pfad.is_dir():
@@ -347,7 +347,7 @@ def waehle_csv_interaktiv(start_dir):
             if neuer_pfad.suffix.lower() == ".csv":
                 return neuer_pfad
             else:
-                ui.draw_header(f"[red]Keine CSV-Datei:[/red] {neuer_pfad.name}")
+                ui.draw_header(f"[red]Not a CSV file:[/red] {neuer_pfad.name}")
 
 
 
@@ -366,10 +366,10 @@ def user_interaktion():
     ui = UI()
     if gewaehlter_pfad:
         CSV_PFAD = gewaehlter_pfad  
-        ui.draw_header(f"[green]Ausgewählt:[/green] {CSV_PFAD}")
+        ui.draw_header(f"[green]Selected:[/green] {CSV_PFAD}")
         return CSV_PFAD
     else:
-        ui.draw_header("[red]Keine Datei ausgewählt.[/red]")
+        ui.draw_header("[red]No file selected.[/red]")
         return None
 
 
@@ -378,7 +378,7 @@ def clear_database():
     ui = UI()
     try:
         if not DB_PFAD.exists():
-            ui.draw_header("[yellow]Datenbank existiert nicht.[/yellow]")
+            ui.draw_header("[yellow]Database does not exist.[/yellow]")
             return False
 
         with sqlite3.connect(DB_PFAD) as conn:
@@ -386,14 +386,14 @@ def clear_database():
             cursor.execute("DELETE FROM transaktionen")
             cursor.execute("DELETE FROM sqlite_sequence WHERE name='transaktionen'")
             conn.commit()
-            ui.draw_header(f"[green]Datenbank geleert – alle Transaktionen gelöscht.[/green]")
+            ui.draw_header(f"[green]Database cleared – all transactions deleted.[/green]")
             return True
 
     except sqlite3.OperationalError as e:
-        ui.draw_header(f"[red]FEHLER (Datenbank):[/red] {e}")
+        ui.draw_header(f"[red]ERROR (database):[/red] {e}")
         return False
     except Exception as e:
-        ui.draw_header(f"[red]FEHLER:[/red] {e}")
+        ui.draw_header(f"[red]ERROR:[/red] {e}")
         return False
         return False
 
@@ -455,7 +455,7 @@ def _undo_last_import_logik(conn: sqlite3.Connection) -> tuple[bool, str]:
     log = _log_laden()
 
     if not log:
-        return False, "Kein Import-Log gefunden – noch nie importiert."
+        return False, "No import log found – never imported."
 
   
     letzter_idx = None
@@ -465,7 +465,7 @@ def _undo_last_import_logik(conn: sqlite3.Connection) -> tuple[bool, str]:
             break
 
     if letzter_idx is None:
-        return False, "Letzter Import wurde bereits erfolgreich rückgängig gemacht."
+        return False, "Last import has already been undone."
 
     eintrag = log[letzter_idx]
     id_von  = eintrag["id_von"]
@@ -485,7 +485,7 @@ def _undo_last_import_logik(conn: sqlite3.Connection) -> tuple[bool, str]:
     _log_speichern(log)
 
     return True, (
-        f"[green]Letzter Import rückgängig gemacht.[/green]\n"
+        f"[green]Last import undone.[/green]\n"
         f"CSV      : {eintrag['csv']}\n"
         f"Datum    : {eintrag['zeitstempel']}\n"
         f"IDs      : {id_von} – {id_bis}\n"
@@ -502,7 +502,7 @@ def undo_last_import():
     ui = UI()
     try:
         if not DB_PFAD.exists():
-            ui.draw_header("[yellow]Datenbank nicht gefunden.[/yellow]")
+            ui.draw_header("[yellow]Database not found.[/yellow]")
             return
 
         with sqlite3.connect(DB_PFAD) as conn:
@@ -513,11 +513,11 @@ def undo_last_import():
                 ui.draw_header(f"[yellow]{nachricht}[/yellow]")
 
     except sqlite3.OperationalError as e:
-        ui.draw_header(f"[red]FEHLER (Datenbank):[/red] {e}")
+        ui.draw_header(f"[red]ERROR (database):[/red] {e}")
     except OSError as e:
-        ui.draw_header(f"[red]FEHLER (Log-Datei):[/red] {e}")
+        ui.draw_header(f"[red]ERROR (log file):[/red] {e}")
     except Exception as e:
-        ui.draw_header(f"[red]Unbekannter FEHLER:[/red] {e}")
+        ui.draw_header(f"[red]Unknown ERROR:[/red] {e}")
 
 
 # ──────────────────────────────────────────────
@@ -547,7 +547,7 @@ def _delete_csv_logik(conn: sqlite3.Connection, csv_pfad: Path) -> tuple[bool, s
 
     conn.commit()
     return True, (
-        f"[green]CSV-Einträge aus Datenbank entfernt.[/green]\n"
+        f"[green]CSV entries removed from database.[/green]\n"
         f"CSV      : {csv_pfad}\n"
         f"Gelöscht : {geloescht} Zeilen"
     )
@@ -565,11 +565,11 @@ def delete_csv_from_db():
         pfad = Path(CSV_PFAD)
 
         if not pfad.is_file():
-            ui.draw_header(f"[yellow]Keine CSV ausgewählt oder Datei nicht gefunden:[/yellow] {pfad}")
+            ui.draw_header(f"[yellow]No CSV selected or file not found:[/yellow] {pfad}")
             return
 
         if not DB_PFAD.exists():
-            ui.draw_header("[yellow]Datenbank nicht gefunden.[/yellow]")
+            ui.draw_header("[yellow]Database not found.[/yellow]")
             return
 
         with sqlite3.connect(DB_PFAD) as conn:
@@ -577,10 +577,10 @@ def delete_csv_from_db():
             ui.draw_header(nachricht)
 
     except FileNotFoundError as e:
-        ui.draw_header(f"[red]FEHLER (CSV nicht gefunden):[/red] {e}")
+        ui.draw_header(f"[red]ERROR (CSV not found):[/red] {e}")
     except KeyError as e:
-        ui.draw_header(f"[red]FEHLER (Spalten fehlen):[/red] {e}")
+        ui.draw_header(f"[red]ERROR (missing columns):[/red] {e}")
     except sqlite3.OperationalError as e:
-        ui.draw_header(f"[red]FEHLER (Datenbank):[/red] {e}")
+        ui.draw_header(f"[red]ERROR (database):[/red] {e}")
     except Exception as e:
-        ui.draw_header(f"[red]Unbekannter FEHLER:[/red] {e}")
+        ui.draw_header(f"[red]Unknown ERROR:[/red] {e}")

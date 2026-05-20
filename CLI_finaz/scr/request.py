@@ -55,7 +55,7 @@ def bank_balance(database: sqlite3.Connection) -> float:
         saldo = row[0]
         return saldo
     else:
-        print("  Noch keine Daten in der Datenbank.")
+        print("  No data in the database yet.")
         return 0.0
 
 
@@ -81,13 +81,13 @@ def test(database: sqlite3.Connection):
 
 def start_saldo_request():
     if not DB_PFAD.exists():
-        print(f"\nFEHLER: Datenbank nicht gefunden: '{DB_PFAD}'")
+        print(f"\nERROR: Database not found: '{DB_PFAD}'")
         return None
     try:
         with sqlite3.connect(DB_PFAD) as conn:
             return bank_balance(conn)
     except sqlite3.OperationalError as e:
-        print(f"\nFEHLER: Tabelle nicht gefunden – bitte zuerst Daten importieren. ({e})")
+        print(f"\nERROR: Table not found – please import data first. ({e})")
         return None
 
 

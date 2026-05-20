@@ -82,15 +82,15 @@ def update_category_on_database(database: sqlite3.Connection) -> int:
 def start_category_update():
     ui = UI()
     if not DB_PFAD.exists():
-        ui.draw_header("[red]FEHLER:[/red] Datenbank nicht gefunden.")
+        ui.draw_header("[red]ERROR:[/red] Database not found.")
         return
     try:
         with sqlite3.connect(DB_PFAD) as conn:
-            ui.draw_header("[bold #fa7ff6]Kategorien werden angewendet...[/bold #fa7ff6]")
+            ui.draw_header("[bold #fa7ff6]Applying categories...[/bold #fa7ff6]")
             anzahl = update_category_on_database(conn)
-            ui.draw_header(f"[green]Fertig –[/green] {anzahl} Transaktionen aktualisiert.")
+            ui.draw_header(f"[green]Done –[/green] {anzahl} transactions updated.")
     except sqlite3.OperationalError as e:
-        ui.draw_header(f"[red]FEHLER (Datenbank):[/red] {e}")
+        ui.draw_header(f"[red]ERROR (database):[/red] {e}")
 
 
 # ──────────────────────────────────────────────
@@ -100,7 +100,7 @@ def start_category_update():
 def _draw_kategorien_panel(ui: UI, kategorien: dict) -> None:
     
     if not kategorien:
-        ui.draw_header("[yellow]Noch keine Kategorien vorhanden.[/yellow]")
+        ui.draw_header("[yellow]No categories yet.[/yellow]")
         return
 
     table = Table(
@@ -171,43 +171,43 @@ def manage_categories():
         # neu kategorie
         elif user_input == "new":
             try:
-                name = prompt("  Kategoriename: ").strip()
+                name = prompt("  Category name: ").strip()
             except (KeyboardInterrupt, EOFError):
                 continue
 
             if not name:
-                ui.draw_header("[yellow]Kein Name eingegeben.[/yellow]")
+                ui.draw_header("[yellow]No name entered.[/yellow]")
                 continue
             if name in kategorien:
-                ui.draw_header(f"[yellow]Kategorie '{name}' existiert bereits.[/yellow]")
+                ui.draw_header(f"[yellow]Category '{name}' already exists.[/yellow]")
                 continue
 
             kategorien[name] = []
             _kategorien_speichern(kategorien)
-            ui.draw_header(f"[green]Kategorie '[bold]{name}[/bold]' erstellt.[/green]")
+            ui.draw_header(f"[green]Category '[bold]{name}[/bold]' created.[/green]")
 
         
         elif user_input == "delete":
             if not kategorien:
-                ui.draw_header("[yellow]Keine Kategorien vorhanden.[/yellow]")
+                ui.draw_header("[yellow]No categories found.[/yellow]")
                 continue
 
             cat_completer = WordCompleter(list(kategorien.keys()), ignore_case=True)
             try:
                 name = prompt(
-                    "  Zu löschende Kategorie: ",
+                    "  Category to delete: ",
                     completer=cat_completer,
                 ).strip()
             except (KeyboardInterrupt, EOFError):
                 continue
 
             if name not in kategorien:
-                ui.draw_header(f"[red]Kategorie '{name}' nicht gefunden.[/red]")
+                ui.draw_header(f"[red]Category '{name}' not found.[/red]")
                 continue
 
             del kategorien[name]
             _kategorien_speichern(kategorien)
-            ui.draw_header(f"[green]Kategorie '[bold]{name}[/bold]' gelöscht.[/green]")
+            ui.draw_header(f"[green]Category '[bold]{name}[/bold]' deleted.[/green]")
 
        
         elif user_input == "wordpool":
@@ -218,21 +218,21 @@ def manage_categories():
             start_category_update()
 
         else:
-            console.print(f"[red]Unbekanntes Kommando:[/red] {user_input}")
+            console.print(f"[red]Unknown command:[/red] {user_input}")
 
 
 
 def _manage_wordpool(ui: UI, kategorien: dict) -> None:
  
     if not kategorien:
-        ui.draw_header("[yellow]Keine Kategorien vorhanden. Bitte zuerst eine erstellen.[/yellow]")
+        ui.draw_header("[yellow]No categories found. Please create one first.[/yellow]")
         return
 
     # Kategorie auswählen
     cat_completer = WordCompleter(list(kategorien.keys()), ignore_case=True)
     try:
         name = prompt(
-            "  Kategorie wählen: ",
+            "  Select category: ",
             completer=cat_completer,
         ).strip()
     except (KeyboardInterrupt, EOFError):
@@ -270,20 +270,20 @@ def _manage_wordpool(ui: UI, kategorien: dict) -> None:
         
         elif user_input == "add":
             try:
-                wort = prompt("  Neues Wort: ").strip()
+                wort = prompt("  New word: ").strip()
             except (KeyboardInterrupt, EOFError):
                 continue
 
             if not wort:
-                ui.draw_header("[yellow]Kein Wort eingegeben.[/yellow]")
+                ui.draw_header("[yellow]No word entered.[/yellow]")
                 continue
             if wort in woerter:
-                ui.draw_header(f"[yellow]'{wort}' ist bereits im Wortpool.[/yellow]")
+                ui.draw_header(f"[yellow]'{wort}' is already in the word pool.[/yellow]")
                 continue
 
             kategorien[name].append(wort)
             _kategorien_speichern(kategorien)
-            ui.draw_header(f"[green]'[bold]{wort}[/bold]' hinzugefügt.[/green]")
+            ui.draw_header(f"[green]'[bold]{wort}[/bold]' added.[/green]")
 
         
         elif user_input == "remove":
@@ -294,22 +294,22 @@ def _manage_wordpool(ui: UI, kategorien: dict) -> None:
             wort_completer = WordCompleter(woerter, ignore_case=True)
             try:
                 wort = prompt(
-                    "  Zu entfernendes Wort: ",
+                    "  Word to remove: ",
                     completer=wort_completer,
                 ).strip()
             except (KeyboardInterrupt, EOFError):
                 continue
 
             if wort not in kategorien[name]:
-                ui.draw_header(f"[red]'{wort}' nicht im Wortpool gefunden.[/red]")
+                ui.draw_header(f"[red]'{wort}' not found in word pool.[/red]")
                 continue
 
             kategorien[name].remove(wort)
             _kategorien_speichern(kategorien)
-            ui.draw_header(f"[green]'[bold]{wort}[/bold]' entfernt.[/green]")
+            ui.draw_header(f"[green]'[bold]{wort}[/bold]' removed.[/green]")
 
         else:
-            console.print(f"[red]Unbekanntes Kommando:[/red] {user_input}")
+            console.print(f"[red]Unknown command:[/red] {user_input}")
 
 
 
@@ -336,7 +336,7 @@ def _draw_wordpool_panel(ui: UI, name: str, woerter: list) -> None:
         table.add_row(str(i), wort)
 
     if not woerter:
-        table.add_row("–", "[italic #888888]Noch keine Wörter[/]")
+        table.add_row("–", "[italic #888888]No words yet[/]")
 
     console.print(Panel(
         table,

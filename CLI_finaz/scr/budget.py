@@ -98,7 +98,7 @@ def _draw_budget_panel(ui: UI, budget: dict, zeitraum: str) -> None:
     breite      = console.width
     balken_len  = max(20, min(40, breite - 55))
 
-    zeitraum_label = {"monat": "aktueller Monat", "jahr": "aktuelles Jahr", "gesamt": "gesamt"}
+    zeitraum_label = {"monat": "current month", "jahr": "current year", "gesamt": "total"}
     titel_suffix   = zeitraum_label.get(zeitraum, zeitraum)
 
     
@@ -109,12 +109,12 @@ def _draw_budget_panel(ui: UI, budget: dict, zeitraum: str) -> None:
         expand=True,
         padding=(0, 1),
     )
-    table.add_column("Kategorie",      width=18, style="bold white")
+    table.add_column("Category",       width=18, style="bold white")
     table.add_column("Limit (€)",      width=12, justify="right")
-    table.add_column("Ausgaben (€)",   width=14, justify="right")
-    table.add_column("Verbleibend (€)",width=15, justify="right")
-    table.add_column("Zeitraum",       width=14, style="#888888")
-    table.add_column("Fortschritt",    ratio=1)
+    table.add_column("Expenses (€)",   width=14, justify="right")
+    table.add_column("Remaining (€)",  width=15, justify="right")
+    table.add_column("Period",         width=14, style="#888888")
+    table.add_column("Progress",       ratio=1)
 
     hat_limit    = []
     ohne_limit   = []
@@ -153,7 +153,7 @@ def _draw_budget_panel(ui: UI, budget: dict, zeitraum: str) -> None:
         balken.append(f"  {prozent*100:.0f}%{' ' + status if status else ''}", style=farbe)
 
         
-        zr_label = {"monat": "Monat", "jahr": "Jahr", "gesamt": "Gesamt"}.get(zr, zr)
+        zr_label = {"monat": "Month", "jahr": "Year", "gesamt": "Total"}.get(zr, zr)
 
         table.add_row(
             kat,
@@ -167,12 +167,12 @@ def _draw_budget_panel(ui: UI, budget: dict, zeitraum: str) -> None:
     
     ohne_text = ""
     if ohne_limit:
-        ohne_text_obj = Text("\n  Ohne Limit:  ", style="#808080")
+        ohne_text_obj = Text("\n  No limit:  ", style="#808080")
         ohne_text_obj.append(", ".join(ohne_limit), style="italic #555555")
         ohne_text = ohne_text_obj
 
     group_items = [
-        Align.center(Text(f"Budget-Übersicht  –  {titel_suffix}", style="bold #fa7ff6")),
+        Align.center(Text(f"Budget Overview  –  {titel_suffix}", style="bold #fa7ff6")),
         table,
     ]
     if ohne_limit:
@@ -198,12 +198,12 @@ def _eingabe_limit(ui: UI) -> float | None:
             return None
 
         if raw == "":
-            ui.draw_header("[yellow]Kein Betrag eingegeben.[/yellow]")
+            ui.draw_header("[yellow]No amount entered.[/yellow]")
             #continue
         try:
             wert = float(raw)
             if wert <= 0:
-                ui.draw_header("[red]Bitte einen Betrag größer als 0 eingeben.[/red]")
+                ui.draw_header("[red]Please enter an amount greater than 0.[/red]")
                 #continue
             return wert
         except ValueError:
@@ -245,7 +245,7 @@ def _budget_edit(ui: UI, budget: dict) -> dict:
 
     kategorien = _kategorien_laden()
     if not kategorien:
-        ui.draw_header("[yellow]Keine Kategorien gefunden. Bitte zuerst in 'categories' anlegen.[/yellow]")
+        ui.draw_header("[yellow]No categories found. Please create some in 'categories' first.[/yellow]")
         return budget
 
     kat_namen = sorted(kategorien.keys())
@@ -284,7 +284,7 @@ def _budget_edit(ui: UI, budget: dict) -> dict:
                 continue
 
             if kat not in kategorien:
-                ui.draw_header(f"[red]Kategorie '[bold]{kat}[/bold]' nicht gefunden.[/red]")
+                ui.draw_header(f"[red]Category '[bold]{kat}[/bold]' not found.[/red]")
                 continue
 
             
@@ -292,8 +292,8 @@ def _budget_edit(ui: UI, budget: dict) -> dict:
                 alt = budget[kat]
 
                 ui.draw_header(
-                    f"[#808080]Aktuell:[/]  Limit [bold]{alt['limit']:.2f} €[/bold]  "
-                    f"/ Zeitraum [bold]{alt['zeitraum']}[/bold]  –  neuen Wert eingeben:"
+                    f"[#808080]Current:[/]  Limit [bold]{alt['limit']:.2f} €[/bold]  "
+                    f"/ Period [bold]{alt['zeitraum']}[/bold]  –  enter new value:"
                 )
 
             limit = _eingabe_limit(ui)
@@ -307,7 +307,7 @@ def _budget_edit(ui: UI, budget: dict) -> dict:
             budget[kat] = {"limit": limit, "zeitraum": zeitraum}
             _budget_speichern(budget)
             ui.draw_header(
-                f"[green]Limit gesetzt:[/green] [bold]{kat}[/bold]  →  "
+                f"[green]Limit set:[/green] [bold]{kat}[/bold]  →  "
                 f"{limit:.2f} € / {zeitraum}"
             )
 
@@ -315,7 +315,7 @@ def _budget_edit(ui: UI, budget: dict) -> dict:
         elif user_input == "remove":
             mit_limit = [k for k in kat_namen if k in budget]
             if not mit_limit:
-                ui.draw_header("[yellow]Keine Kategorie mit Limit vorhanden.[/yellow]")
+                ui.draw_header("[yellow]No category with a limit found.[/yellow]")
                 continue
 
             rm_completer = WordCompleter(mit_limit, ignore_case=True)
@@ -328,15 +328,15 @@ def _budget_edit(ui: UI, budget: dict) -> dict:
                 continue
 
             if kat not in budget:
-                ui.draw_header(f"[red]Kein Limit für '[bold]{kat}[/bold]' gefunden.[/red]")
+                ui.draw_header(f"[red]No limit found for '[bold]{kat}[/bold]'.[/red]")
                 continue
 
             del budget[kat]
             _budget_speichern(budget)
-            ui.draw_header(f"[green]Limit für '[bold]{kat}[/bold]' entfernt.[/green]")
+            ui.draw_header(f"[green]Limit for '[bold]{kat}[/bold]' removed.[/green]")
 
         else:
-            console.print(f"[red]Unbekanntes Kommando:[/red] {user_input}")
+            console.print(f"[red]Unknown command:[/red] {user_input}")
 
 
 # ──────────────────────────────────────────────
@@ -393,13 +393,13 @@ def manage_budget() -> None:
             zr = _eingabe_zeitraum(ui)
             if zr:
                 zeitraum = zr
-                ui.draw_header(f"[green]Zeitraum gesetzt:[/green] [bold]{zeitraum}[/bold]")
+                ui.draw_header(f"[green]Period set:[/green] [bold]{zeitraum}[/bold]")
 
         # ── Limits bearbeiten ────────────────────────────────────────────────
         elif user_input == "edit":
             budget = _budget_edit(ui, budget)
 
         else:
-            console.print(f"[red]Unbekanntes Kommando:[/red] {user_input}")
+            console.print(f"[red]Unknown command:[/red] {user_input}")
 
 
