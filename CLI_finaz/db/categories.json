@@ -230,6 +230,5 @@
     "tui",
     "neckermann"
   ],
-  "weglassen": [
-  ]
+  "weglassen": []
 }

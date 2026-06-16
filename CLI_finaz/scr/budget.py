@@ -178,12 +178,12 @@ def _draw_budget_panel(ui: UI, budget: dict, zeitraum: str) -> None:
     if ohne_limit:
         group_items.append(ohne_text)
 
-    console.print(Panel(
+    return Panel(
         Group(*group_items),
         title="[bold green]Budget[/]",
         border_style="bold blue",
         box=box.ROUNDED,
-    ))
+    )
 
 
 # ──────────────────────────────────────────────

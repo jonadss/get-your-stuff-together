@@ -97,11 +97,9 @@ def start_category_update():
 # KATEGORIE ERSTELLEN / LÖSCHEN
 # ──────────────────────────────────────────────
 
-def _draw_kategorien_panel(ui: UI, kategorien: dict) -> None:
-    
+def _draw_kategorien_panel(ui, kategorien: dict):
     if not kategorien:
-        ui.draw_header("[yellow]No categories yet.[/yellow]")
-        return
+        return None
 
     table = Table(
         box=box.SIMPLE,
@@ -116,12 +114,12 @@ def _draw_kategorien_panel(ui: UI, kategorien: dict) -> None:
     for name, woerter in kategorien.items():
         table.add_row(name, ", ".join(woerter) if woerter else "–")
 
-    console.print(Panel(
+    return Panel(
         table,
         title="[bold green]Kategorien[/]",
         border_style="bold blue",
         box=box.ROUNDED,
-    ))
+    )
 
 ######################################
 ###########User Interaktion###########
@@ -321,7 +319,7 @@ def _manage_wordpool(ui: UI, kategorien: dict) -> None:
 # WORTPOOL UI
 # ──────────────────────────────────────────────
 
-def _draw_wordpool_panel(ui: UI, name: str, woerter: list) -> None:
+def _draw_wordpool_panel(ui, name: str, woerter: list):
     table = Table(
         box=box.SIMPLE,
         show_header=True,
@@ -338,12 +336,12 @@ def _draw_wordpool_panel(ui: UI, name: str, woerter: list) -> None:
     if not woerter:
         table.add_row("–", "[italic #888888]No words yet[/]")
 
-    console.print(Panel(
+    return Panel(
         table,
         title=f"[bold green]Wortpool – {name}[/]",
         border_style="bold blue",
         box=box.ROUNDED,
-    ))
+    )
 
 
 

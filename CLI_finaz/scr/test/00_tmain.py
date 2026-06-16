@@ -72,8 +72,8 @@ def start_app():
 
 
             elif user_input == "addieren":
-                n1 = prompt("Erste Zahl: ")
-                n2 = prompt("Zweite Zahl: ")
+                n1 = console.input("[bold]Erste Zahl:[/bold] ")
+                n2 = console.input("[bold]Zweite Zahl:[/bold] ")
                 try:
                     res = int(n1) + int(n2)
                     console.print(f"[green]Ergebnis:[/green] {res}")

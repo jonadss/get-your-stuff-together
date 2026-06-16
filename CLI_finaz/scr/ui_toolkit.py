@@ -12,7 +12,15 @@ from prompt_toolkit import prompt
 from prompt_toolkit.completion import WordCompleter
 from rich.text import Text
 
+from textual.app import App, ComposeResult
+from textual.widgets import Input, Static, OptionList, ContentSwitcher, Tabs, Tab
+from textual.widgets.option_list import Option
+from textual.containers import Vertical, Horizontal, VerticalScroll
 
+from dataclasses import dataclass, field
+from typing import Callable
+import math
+import threading
 
 
 

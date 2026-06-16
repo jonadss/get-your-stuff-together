@@ -177,12 +177,12 @@ def _draw_debts_panel(ui: UI, cursor: sqlite3.Cursor) -> None:
             alle_gruppen.append(ptable)
             alle_gruppen.append(Text(""))  # Leerzeile zwischen Personen
 
-    console.print(Panel(
+    return Panel(
         Group(*alle_gruppen),
         title="[bold green]Debt Overview[/]",
         border_style="bold blue",
         box=box.ROUNDED,
-    ))
+    )
 
 
 def _draw_person_table(ui: UI, person: str, eintraege: list[tuple]) -> None:
