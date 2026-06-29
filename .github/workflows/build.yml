@@ -1,0 +1,48 @@
+name: Build Executables
+
+on:
+  push:
+    tags:
+      - 'v*'          # Trigger bei: git tag v1.0 && git push --tags
+  workflow_dispatch:  # Manueller Start über GitHub UI möglich
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: CLI_finaz
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install pyinstaller pandas tabulate rich prompt-toolkit
+      - name: Build Linux binary
+        run: pyinstaller financ-app.spec
+      - name: Upload Linux binary
+        uses: actions/upload-artifact@v4
+        with:
+          name: financ-app-linux
+          path: CLI_finaz/dist/financ-app
+
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: CLI_finaz
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install dependencies
+        run: pip install pyinstaller pandas tabulate rich prompt-toolkit
+      - name: Build Windows exe
+        run: pyinstaller financ-app.spec
+      - name: Upload Windows exe
+        uses: actions/upload-artifact@v4
+        with:
+          name: financ-app-windows
+          path: CLI_finaz/dist/financ-app.exe
