@@ -19,10 +19,9 @@ import json
 # PFADE  (relativ zum Skript-Verzeichnis)
 # ──────────────────────────────────────────────
 
-SKRIPT_DIR = Path(__file__).parent                          
-PROJEKT_DIR = SKRIPT_DIR.parent                             
+from _paths import PROJEKT_DIR
 
-CSV_PFAD = SKRIPT_DIR
+CSV_PFAD = Path.home()
 DB_PFAD  = PROJEKT_DIR / "db" / "finac.db"
 
 
@@ -362,9 +361,6 @@ CSV_PFAD = SKRIPT_DIR
 def user_interaktion():
     global CSV_PFAD  
     
-    SKRIPT_DIR  = Path(__file__).parent
-    PROJEKT_DIR = SKRIPT_DIR.parent
-
     gewaehlter_pfad = waehle_csv_interaktiv(PROJEKT_DIR)
 
     ui = UI()

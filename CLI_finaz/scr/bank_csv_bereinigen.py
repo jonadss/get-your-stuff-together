@@ -13,8 +13,7 @@ import pandas as pd
 from pathlib import Path
 
 
-SKRIPT_DIR   = Path(__file__).parent
-PROJEKT_DIR  = SKRIPT_DIR.parent
+from _paths import PROJEKT_DIR
 CATEGORY_PFAD = PROJEKT_DIR / "db" / "categories.json"
 
 # Spaltennamen der Bank-CSV (ING/Sparkasse-Format)

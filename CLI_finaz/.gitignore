@@ -1,0 +1,17 @@
+# Build artifacts
+dist/
+build/
+*.spec.bak
+__pycache__/
+*.pyc
+
+# Virtual environments
+.venv/
+.venv-build/
+
+# Database & user data
+db/
+
+# CSV files
+csv/
+*.csv

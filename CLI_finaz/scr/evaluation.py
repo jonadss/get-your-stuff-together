@@ -10,8 +10,7 @@ from datetime import timedelta
 # PATHS
 # ──────────────────────────────────────────────
 
-SKRIPT_DIR  = Path(__file__).parent
-PROJEKT_DIR = SKRIPT_DIR.parent
+from _paths import PROJEKT_DIR
 EVAL_JSON   = PROJEKT_DIR / "db" / "evaluation.json"
 CAT_JSON    = PROJEKT_DIR / "db" / "categories.json"
 BUDGET_JSON = PROJEKT_DIR / "db" / "budget.json"

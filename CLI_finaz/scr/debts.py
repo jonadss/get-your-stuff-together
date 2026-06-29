@@ -14,8 +14,7 @@ from ui_styles import UI
 # PFADE
 # ──────────────────────────────────────────────
 
-SKRIPT_DIR  = Path(__file__).parent
-PROJEKT_DIR = SKRIPT_DIR.parent
+from _paths import PROJEKT_DIR
 DB_PFAD     = PROJEKT_DIR / "db" / "finac.db"
 
 

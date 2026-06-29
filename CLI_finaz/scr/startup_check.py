@@ -2,9 +2,7 @@ from pathlib import Path
 import sqlite3
 import json
 
-
-SKRIPT_DIR  = Path(__file__).parent
-PROJEKT_DIR = SKRIPT_DIR.parent
+from _paths import PROJEKT_DIR
 
 DB_PFAD     = PROJEKT_DIR / "db" / "finac.db"
 CAT_JSON    = PROJEKT_DIR / "db" / "categories.json"
