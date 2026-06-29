@@ -106,7 +106,7 @@ def start_balance_overview():
                 console.print(f"[red]Unknown command:[/red] {user_input}")
 
         # Fängt Strg+C ab
-        except KeyboardInterrupt,EOFError: 
+        except (KeyboardInterrupt, EOFError):
             start_ui.draw_exit_panel()
 
 
@@ -179,7 +179,7 @@ def start_importer():
                 console.print(f"[red]Unknown command:[/red] {user_input}")
 
         # Fängt Strg+C ab
-        except KeyboardInterrupt,EOFError: 
+        except (KeyboardInterrupt, EOFError):
             #start_ui.draw_exit_panel()
             return
 

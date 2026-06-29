@@ -9,7 +9,7 @@ __pycache__/
 .venv/
 .venv-build/
 
-# Database & user data
+# Database & user data (but not defaults/)
 db/
 
 # CSV files

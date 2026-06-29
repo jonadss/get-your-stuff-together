@@ -4,7 +4,7 @@ a = Analysis(
     ['scr/main.py'],
     pathex=['scr'],          # scr/ im sys.path damit relative imports klappen
     binaries=[],
-    datas=[('db/categories.json', 'defaults')],
+    datas=[('defaults/categories.json', 'defaults')],
     hiddenimports=[
         'pandas',
         'tabulate',
