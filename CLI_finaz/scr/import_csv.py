@@ -35,7 +35,7 @@ SPALTE_BIC_KONTO         = "BIC Auftragskonto"
 SPALTE_BANKNAME          = "Bankname Auftragskonto"
 SPALTE_BUCHUNGSTAG       = "Buchungstag"
 SPALTE_VALUTADATUM       = "Valutadatum"
-SPALTE_NAME_PARTNER      = "Namefrom ui_toolkit import * Zahlungsbeteiligter"
+SPALTE_NAME_PARTNER      = "Name Zahlungsbeteiligter"
 SPALTE_IBAN_PARTNER      = "IBAN Zahlungsbeteiligter"
 SPALTE_BIC_PARTNER       = "BIC (SWIFT-Code) Zahlungsbeteiligter"
 SPALTE_BUCHUNGSTEXT      = "Buchungstext"
@@ -354,9 +354,6 @@ def waehle_csv_interaktiv(start_dir):
 
 
 
-
-
-CSV_PFAD = SKRIPT_DIR  
 
 def user_interaktion():
     global CSV_PFAD  
