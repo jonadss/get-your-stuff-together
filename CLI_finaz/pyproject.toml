@@ -6,7 +6,7 @@ authors = [
     {name = "Jonadss",email = "jonas.hiekel@gmail.com"}
 ]
 readme = "README.md"
-requires-python = ">=3.14"
+requires-python = ">=3.14,<4.0"
 dependencies = [
     "pandas (>=3.0.1,<4.0.0)",
     "tabulate (>=0.10.0,<0.11.0)",
